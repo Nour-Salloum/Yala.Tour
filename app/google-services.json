@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "492731826496",
+    "project_id": "yala-tour",
+    "storage_bucket": "yala-tour.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492731826496:android:c01cd218899cf8fd4d3aa5",
+        "android_client_info": {
+          "package_name": "com.example.yalatour"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxqD9aBpM9kwrYZ3hqz6WXZ1QyRo11FO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

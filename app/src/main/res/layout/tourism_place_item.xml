@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="185dp"
+    android:layout_height="250dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/placeCard"
+
+    android:layout_marginHorizontal="7dp"
+    android:layout_marginVertical="15dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:id="@+id/placeImage"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/upload"
+            android:scaleType="centerCrop"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/placeTitle"
+            android:text="Title"
+            android:textColor="@color/lavender"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_below="@+id/placeImage"
+            android:layout_marginTop="20dp"
+
+/>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/edit"
+            android:background="@null"
+            android:id="@+id/EditPlace"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_below="@+id/placeTitle"/>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/delete"
+            android:background="@null"
+            android:id="@+id/DeletePlace"
+            android:layout_below="@+id/placeTitle"
+            android:layout_marginTop="10dp"
+           android:layout_toRightOf="@+id/EditPlace"/>
+
+
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

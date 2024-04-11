@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Yala Tour</string>
+    <string name="Login">Login</string>
+    <string name="Signup">Signup</string>
+</resources>
