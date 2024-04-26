@@ -195,11 +195,12 @@ public class PlacesDetails extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String isUser = documentSnapshot.getString("isUser");
+                            int isUser = documentSnapshot.getLong("isUser").intValue();
+
 
 
                             // Show or hide FAB based on admin status
-                            if (isUser != null && isUser.equals("1")) {
+                            if (isUser != 0 && isUser==1) {
                                 ReviewText.setVisibility(View.VISIBLE);
                                 Send.setVisibility(View.VISIBLE);
                                 PlaceRating.setVisibility(View.VISIBLE);
