@@ -1,34 +1,30 @@
 package com.example.yalatour.UploadActivities;
 
+
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.yalatour.Activities.CityActivity;
-import com.example.yalatour.Activities.TourismPlaces;
 import com.example.yalatour.Adapters.CategoryAdapter;
 import com.example.yalatour.Classes.Category;
 import com.example.yalatour.Classes.TourismPlaceClass;
+import com.example.yalatour.EditActivities.EditPlaceActivity;
 import com.example.yalatour.R;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,15 +35,16 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// Define the UploadPlaceActivity class
 public class UploadPlaceActivity extends AppCompatActivity {
 
+    // Declare variables
     EditText uploadPlace, uploadDesc;
     Button saveButton;
-    List<Uri> imageUris;
+    List<String> imageUrls;
     FirebaseFirestore db;
     LinearLayout imagePicker;
     String cityName;
@@ -55,25 +52,29 @@ public class UploadPlaceActivity extends AppCompatActivity {
     CategoryAdapter categoryAdapter;
 
 
+    // Override onCreate method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_place);
 
+        // Initialize views and variables
         uploadPlace = findViewById(R.id.uploadPlace);
         uploadDesc = findViewById(R.id.uploadPlaceDesc);
         saveButton = findViewById(R.id.savePlaceButton);
         db = FirebaseFirestore.getInstance();
-        imageUris = new ArrayList<>();
+        imageUrls = new ArrayList<>();
         imagePicker = findViewById(R.id.imageContainer);
         categoryRecyclerView = findViewById(R.id.categoryRecyclerView);
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Get city name passed from previous activity
         cityName = getIntent().getStringExtra("cityName");
 
         // Populate categories in the RecyclerView
         populateCategories();
 
+        // Set click listener for image picker
         imagePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,6 +82,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
             }
         });
 
+        // Set click listener for save button
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +91,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
         });
     }
 
+    // Method to populate categories in the RecyclerView
     private void populateCategories() {
         // Define an array of categories
         String[] categories = {"Tourist Attractions", "Museums", "Religious Sites", "Activities", "Nature"};
@@ -117,6 +120,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
         return selectedCategories;
     }
 
+    // Method to open image picker
     private void openImagePicker() {
         Intent photoPicker = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         photoPicker.setType("image/*");
@@ -124,34 +128,40 @@ public class UploadPlaceActivity extends AppCompatActivity {
         startActivityForResult(photoPicker, 1);
     }
 
-
+    // Handle result from image picker
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == 1) {
-            if (data != null && data.getClipData() != null) {
-                int count = data.getClipData().getItemCount();
-                for (int i = 0; i < count; i++) {
-                    Uri selectedImageUri = data.getClipData().getItemAt(i).getUri();
-                    imageUris.add(selectedImageUri);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            if (data != null) {
+
+                if (data.getClipData() != null) {
+                    // If multiple images are selected
+                    int count = data.getClipData().getItemCount();
+                    for (int i = 0; i < count; i++) {
+                        Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                        uploadImageToStorage(imageUri);
+                    }
+                } else if (data.getData() != null) {
+                    // If single image is selected
+                    Uri imageUri = data.getData();
+                    uploadImageToStorage(imageUri);
                 }
-                // Display selected images
-                displaySelectedImages(imageUris);
+                displaySelectedImages(imageUrls);
                 imagePicker.setBackground(null);
             }
         }
-
     }
-
-    private void displaySelectedImages(List<Uri> imageUris) {
+    // Method to display selected images
+    private void displaySelectedImages(List<String> imageUrls) {
         LinearLayout imageContainer = findViewById(R.id.imageContainer);
-        imageContainer.removeAllViews(); // Clear previous images if any
+        imageContainer.removeAllViews();
 
-        // Create a new vertical LinearLayout to contain rows of images
         LinearLayout.LayoutParams containerParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
+
         LinearLayout verticalLayout = new LinearLayout(this);
         verticalLayout.setLayoutParams(containerParams);
         verticalLayout.setOrientation(LinearLayout.VERTICAL);
@@ -161,87 +171,95 @@ public class UploadPlaceActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        layoutParams.setMargins(10, 10, 20, 0); // Add margins between images
+        layoutParams.setMargins(10, 10, 20, 0);
 
         int count = 0;
-        LinearLayout currentRowLayout = null; // Initialize outside the loop
-        for (Uri imageUri : imageUris) {
+        LinearLayout currentRowLayout = null;
+
+        for (String imageUrl : imageUrls) {
             if (count % 3 == 0) {
-                // If count is divisible by 3, create a new horizontal LinearLayout
                 currentRowLayout = new LinearLayout(this);
                 currentRowLayout.setLayoutParams(containerParams);
                 currentRowLayout.setOrientation(LinearLayout.HORIZONTAL);
                 verticalLayout.addView(currentRowLayout);
             }
 
-            // Create ImageView for the image
+            FrameLayout imageFrameLayout = new FrameLayout(this);
+            imageFrameLayout.setLayoutParams(layoutParams);
+
             ImageView imageView = new ImageView(this);
-            imageView.setLayoutParams(layoutParams);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP); // Adjust scale type as needed
+            imageView.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            ));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-            // Load image into ImageView using Glide
+            // Load image using Glide library
             Glide.with(this)
-                    .load(imageUri)
-                    .override(250, 250) // Set desired width and height
-                    .centerCrop() // Scale type
+                    .load(imageUrl)
+                    .override(250, 250)
+                    .centerCrop()
                     .into(imageView);
-            // Create a layout to hold the image and the deselect button
-            LinearLayout imageLayout = new LinearLayout(this);
-            imageLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-            imageLayout.setOrientation(LinearLayout.VERTICAL); // Change orientation to VERTICAL
-            currentRowLayout.addView(imageLayout);
 
-            // Add the image to the current horizontal layout
-            imageLayout.addView(imageView);
-
-            // Create a button to deselect the image
+            // Create the "X" button with custom margins
             Button deselectButton = new Button(this);
+            FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            deselectButton.setLayoutParams(buttonLayoutParams);
+
             deselectButton.setText("X");
-            deselectButton.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
+
+            // Set button background and position
+            deselectButton.setBackgroundResource(R.drawable.styles);
+            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+
+            // Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Remove the corresponding image from the list of selected images
-                    imageUris.remove(imageUri);
-                    // Remove the image and the button from the parent layout
-                    imageLayout.removeView(imageView);
-                    imageLayout.removeView(deselectButton);
-                    // Check if any image is selected
-                    if (imageUris.isEmpty()) {
-                        // If no image is selected, reset the background of the layout
+                    // Remove image and button on deselection
+                    imageUrls.remove(imageUrl);
+                    imageFrameLayout.removeView(imageView);
+                    imageFrameLayout.removeView(deselectButton);
+                    if (imageUrls.isEmpty()) {
                         imageContainer.setBackground(getResources().getDrawable(R.drawable.upload));
+                       imagePicker.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                openImagePicker();
+                            }
+                        });
+
                     }
                 }
             });
-            imageLayout.addView(deselectButton);
+
+            imageFrameLayout.addView(imageView);
+            imageFrameLayout.addView(deselectButton);
+
+            currentRowLayout.addView(imageFrameLayout);
 
             count++;
         }
 
-        // If no image is selected, reset the background of the layout
-        if (imageUris.isEmpty()) {
-            imageContainer.setBackground(getResources().getDrawable(R.drawable.upload)); // Set your background drawable
+        if (imageUrls.isEmpty()) {
+            imageContainer.setBackground(getResources().getDrawable(R.drawable.upload));
+
+        } else {
+            imageContainer.setBackground(null);
+
         }
     }
-
-
-
-
-
-
-
+    // Method to save data
     private void saveData() {
         String placeName = uploadPlace.getText().toString().trim();
         String placeDesc = uploadDesc.getText().toString().trim();
         List<String> selectedCategories = getSelectedCategories();
 
-        if (placeName.isEmpty() || placeDesc.isEmpty() || selectedCategories.isEmpty() || imageUris.isEmpty()) {
+        if (placeName.isEmpty() || placeDesc.isEmpty() || selectedCategories.isEmpty() || imageUrls.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields, select at least one category and choose at least one image", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -251,52 +269,44 @@ public class UploadPlaceActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        // Upload images to Firebase Storage
-        uploadImagesToStorage(progressDialog, placeName, placeDesc, selectedCategories);
+
+        savePlaceData(imageUrls,progressDialog, placeName, placeDesc, selectedCategories);
     }
 
-    private void uploadImagesToStorage(final ProgressDialog progressDialog,
-                                       final String placeName, final String placeDesc, final List<String> selectedCategories) {
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("TourismPlaces");
-        List<Task<Uri>> uploadTasks = new ArrayList<>();
-        for (Uri imageUri : imageUris) {
-            final StorageReference imageRef = storageRef.child(imageUri.getLastPathSegment());
-            UploadTask uploadTask = imageRef.putFile(imageUri);
-            uploadTasks.add(uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-                    return imageRef.getDownloadUrl();
-                }
-            }));
-        }
+    // Method to upload images to Firebase Storage
+    private void uploadImageToStorage(Uri imageUri) {
+        // Show progress dialog while uploading
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Uploading...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-        Task<List<Uri>> allTasks = Tasks.whenAllSuccess(uploadTasks);
-        allTasks.addOnCompleteListener(new OnCompleteListener<List<Uri>>() {
-            @Override
-            public void onComplete(@NonNull Task<List<Uri>> task) {
-                if (task.isSuccessful()) {
-                    List<String> imageUrls = new ArrayList<>();
-                    for (Uri uri : task.getResult()) {
-                        imageUrls.add(uri.toString());
-                    }
-                    // Save data to Firestore
-                    savePlaceData(imageUrls, progressDialog, placeName, placeDesc, selectedCategories);
-                } else {
-
-                    Toast.makeText(UploadPlaceActivity.this, "Failed to upload image(s)", Toast.LENGTH_SHORT).show();
-                }
-                progressDialog.dismiss();
-            }
-        });
+        // Get Firebase storage reference
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("TourismPlaces/" + System.currentTimeMillis() + ".jpg");
+        // Upload image to storage
+        storageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    progressDialog.dismiss();
+                    // Get the download URL of the uploaded image
+                    Task<Uri> downloadUriTask = storageRef.getDownloadUrl();
+                    downloadUriTask.addOnSuccessListener(uri -> {
+                        String imageUrl = uri.toString();
+                        imageUrls.add(imageUrl);
+                        displaySelectedImages(imageUrls);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(UploadPlaceActivity.this, "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
+    // Method to save place data to Firestore
     private void savePlaceData(List<String> imageUrls, ProgressDialog progressDialog,
                                String placeName, String placeDesc, List<String> selectedCategories) {
         // Create a new document in the "TourismPlaces" collection with the provided data
-        TourismPlaceClass place = new TourismPlaceClass(null, placeName, placeDesc, selectedCategories, imageUrls, cityName);
+        TourismPlaceClass place = new TourismPlaceClass(null, placeName, placeDesc, selectedCategories, imageUrls, cityName,0);
         db.collection("TourismPlaces")
                 .add(place)
                 .addOnSuccessListener(documentReference -> {
@@ -319,12 +329,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
                                 Toast.makeText(UploadPlaceActivity.this, "Failed to upload place: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
                             });
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failure
-                    Toast.makeText(UploadPlaceActivity.this, "Failed to upload place: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
                 });
-    }
 
+    }
 }

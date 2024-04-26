@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,10 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -38,6 +42,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     private Context context;
     private List<TourismPlaceClass> placeList;
     private String selectedCity;
+    private FirebaseFirestore db;
 
     public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList, String selectedCity) {
         this.context = context;
@@ -65,6 +70,8 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     intent.putExtra("placeName", place.getPlaceName());
                     intent.putExtra("placeDescription", place.getPlaceDescription());
                     intent.putStringArrayListExtra("placeImages", new ArrayList<>(place.getPlaceImages()));
+                    intent.putExtra("TotalRating",place.getTotalRating());
+                    intent.putExtra("PlaceId", place.getPlaceId());
                     context.startActivity(intent);
                 }
             });
@@ -105,6 +112,38 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 dialog.show();
             }
         });
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+
+            db.collection("Users").document(userId)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String isAdmin = documentSnapshot.getString("isAdmin");
+                            Log.d("UserAuthentication", "isAdmin value: " + isAdmin);
+
+                            // Show or hide FAB based on admin status
+                            if (isAdmin != null && isAdmin.equals("1")) {
+                                holder.EditPlace.setVisibility(View.VISIBLE);
+                                holder.Delete.setVisibility(View.VISIBLE);
+
+                            } else {
+                                holder.EditPlace.setVisibility(View.GONE);
+                                holder.Delete.setVisibility(View.GONE);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("TourismPlaces", "Failed to fetch user data", e);
+                    });
+        } else {
+            // User is not signed in, handle accordingly
+        }
+
     }
 
     @Override
@@ -167,6 +206,8 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                                 placeList.remove(place);
                                 // Notify the adapter that the dataset has changed
                                 notifyDataSetChanged();
+                                deleteReviews(place.getPlaceId());
+                                deleteRatings(place.getPlaceId());
                                 // Show toast message for successful deletion
                                 Toast.makeText(context, "Place deleted successfully", Toast.LENGTH_SHORT).show();
                             }
@@ -187,6 +228,40 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
     }
+    private void deleteReviews(String placeId) {
+        db = FirebaseFirestore.getInstance();
+        db.collection("Reviews")
+                .whereEqualTo("review_placeid", placeId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult().getDocuments()) {
+                            String reviewId = document.getId();
+                            db.collection("Reviews").document(reviewId).delete();
+                        }
+                    } else {
+                        Log.e("PlacesDetails", "Error deleting reviews: ", task.getException());
+                    }
+                });
+    }
+    private void deleteRatings(String placeId) {
+        db = FirebaseFirestore.getInstance();
+        db.collection("Ratings")
+                .whereEqualTo("rating_Placeid", placeId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult().getDocuments()) {
+                            String ratingId = document.getId();
+                            db.collection("Ratings").document(ratingId).delete();
+                        }
+                    } else {
+                        Log.e("PlacesDetails", "Error deleting ratings: ", task.getException());
+                    }
+                });
+    }
+
+
 
 
 }

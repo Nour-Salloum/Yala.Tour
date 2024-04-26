@@ -1,15 +1,19 @@
 package com.example.yalatour.EditActivities;
 
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -22,7 +26,6 @@ import com.example.yalatour.Adapters.CategoryAdapter;
 import com.example.yalatour.Classes.Category;
 import com.example.yalatour.R;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -30,8 +33,10 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.List;
 
+// Define the EditPlaceActivity class
 public class EditPlaceActivity extends AppCompatActivity {
 
+    // Declare variables
     EditText PlaceName, PlaceDesc;
     Button Edit;
     List<String> imageUrls;
@@ -40,27 +45,33 @@ public class EditPlaceActivity extends AppCompatActivity {
     RecyclerView categoryRecyclerView;
     CategoryAdapter categoryAdapter;
     LinearLayout imageContainer;
+    TextView MoreImages;
 
     // List to keep track of images to delete
     List<String> imagesToDelete = new ArrayList<>();
 
+    // Override onCreate method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_place);
 
+        // Initialize views
         PlaceName = findViewById(R.id.EditPlaceName);
         PlaceDesc = findViewById(R.id.EditPlaceDesc);
         Edit_imagePicker = findViewById(R.id.Edit_imageContainer);
+        MoreImages=findViewById(R.id.MoreImages);
         Edit = findViewById(R.id.EditPlaceButton);
 
-        Edit_imagePicker.setOnClickListener(new View.OnClickListener() {
+        // Set click listener for image picker
+        MoreImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openImagePicker();
             }
         });
 
+        // Set click listener for edit button
         Edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,40 +79,49 @@ public class EditPlaceActivity extends AppCompatActivity {
             }
         });
 
+        // Retrieve data passed from previous activity
         String placeName = getIntent().getStringExtra("placeName");
         String placeDescription = getIntent().getStringExtra("placeDescription");
         List<String> placeImages = getIntent().getStringArrayListExtra("placeImages");
         List<String> placeCategories = getIntent().getStringArrayListExtra("placeCategories");
 
+        // Set text for place name and description
         PlaceName.setText(placeName);
         PlaceDesc.setText(placeDescription);
 
+        // Initialize imageUrls list
         imageUrls = new ArrayList<>();
         if (placeImages != null) {
             imageUrls.addAll(placeImages);
         }
 
+        // Display selected images
         displaySelectedImages(imageUrls);
 
+        // Initialize and populate category RecyclerView
         categoryRecyclerView = findViewById(R.id.categoryRecyclerView);
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         populateCategories(placeCategories);
     }
 
+    // Method to populate category list
     private void populateCategories(List<String> placeCategories) {
+        // Define categories
         String[] categories = {"Tourist Attractions", "Museums", "Religious Sites", "Activities", "Nature"};
 
+        // Create category list with isSelected status based on placeCategories
         List<Category> categoryList = new ArrayList<>();
         for (String category : categories) {
             boolean isSelected = placeCategories != null && placeCategories.contains(category);
             categoryList.add(new Category(category, isSelected));
         }
 
+        // Set up category adapter
         categoryAdapter = new CategoryAdapter(categoryList);
         categoryRecyclerView.setAdapter(categoryAdapter);
     }
 
+    // Method to get selected categories
     private List<String> getSelectedCategories() {
         List<String> selectedCategories = new ArrayList<>();
         for (Category category : categoryAdapter.getCategoryList()) {
@@ -112,7 +132,9 @@ public class EditPlaceActivity extends AppCompatActivity {
         return selectedCategories;
     }
 
+    // Method to open image picker
     private void openImagePicker() {
+        // Create intent to pick images from gallery
         Intent photoPicker = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         photoPicker.setType("image/*");
         photoPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -126,12 +148,14 @@ public class EditPlaceActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data != null) {
                 if (data.getClipData() != null) {
+                    // If multiple images are selected
                     int count = data.getClipData().getItemCount();
                     for (int i = 0; i < count; i++) {
                         Uri imageUri = data.getClipData().getItemAt(i).getUri();
                         uploadImageToStorage(imageUri);
                     }
                 } else if (data.getData() != null) {
+                    // If single image is selected
                     Uri imageUri = data.getData();
                     uploadImageToStorage(imageUri);
                 }
@@ -139,14 +163,18 @@ public class EditPlaceActivity extends AppCompatActivity {
         }
     }
 
+    // Method to upload image to storage
     private void uploadImageToStorage(Uri imageUri) {
+        // Show progress dialog while uploading
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Uploading...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
+        // Get Firebase storage reference
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference().child("TourismPlaces/" + System.currentTimeMillis() + ".jpg");
+        // Upload image to storage
         storageRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
                     progressDialog.dismiss();
@@ -196,69 +224,97 @@ public class EditPlaceActivity extends AppCompatActivity {
                 verticalLayout.addView(currentRowLayout);
             }
 
+            FrameLayout imageFrameLayout = new FrameLayout(this);
+            imageFrameLayout.setLayoutParams(layoutParams);
+
             ImageView imageView = new ImageView(this);
-            imageView.setLayoutParams(layoutParams);
+            imageView.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            ));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
+            // Load image using Glide library
             Glide.with(this)
                     .load(imageUrl)
                     .override(250, 250)
                     .centerCrop()
                     .into(imageView);
 
-            LinearLayout imageLayout = new LinearLayout(this);
-            imageLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-            imageLayout.setOrientation(LinearLayout.VERTICAL);
-            currentRowLayout.addView(imageLayout);
-            imageLayout.addView(imageView);
-
+            // Create the "X" button with custom margins
             Button deselectButton = new Button(this);
+            FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            deselectButton.setLayoutParams(buttonLayoutParams);
+
             deselectButton.setText("X");
-            deselectButton.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
+
+            // Set button background and position
+            deselectButton.setBackgroundResource(R.drawable.styles);
+            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+
+            // Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Remove image and button on deselection
                     imageUrls.remove(imageUrl);
-                    imageLayout.removeView(imageView);
-                    imageLayout.removeView(deselectButton);
+                    imageFrameLayout.removeView(imageView);
+                    imageFrameLayout.removeView(deselectButton);
                     if (imageUrls.isEmpty()) {
                         imageContainer.setBackground(getResources().getDrawable(R.drawable.upload));
+                        Edit_imagePicker.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                openImagePicker();
+                            }
+                        });
+                        MoreImages.setVisibility(View.GONE);
                     }
                 }
             });
-            imageLayout.addView(deselectButton);
+
+            imageFrameLayout.addView(imageView);
+            imageFrameLayout.addView(deselectButton);
+
+            currentRowLayout.addView(imageFrameLayout);
 
             count++;
         }
 
         if (imageUrls.isEmpty()) {
             imageContainer.setBackground(getResources().getDrawable(R.drawable.upload));
+            MoreImages.setVisibility(View.GONE);
         } else {
-            imageContainer.setBackground(null); // Remove background
+            imageContainer.setBackground(null);
+            MoreImages.setVisibility(View.VISIBLE);
         }
     }
 
+
+
+    // Method to save edited data
     private void saveEditedData() {
         String editedPlaceName = PlaceName.getText().toString().trim();
         String editedPlaceDesc = PlaceDesc.getText().toString().trim();
         List<String> editedCategories = getSelectedCategories();
 
+        // Check if all fields are filled
         if (editedPlaceName.isEmpty() || editedPlaceDesc.isEmpty() || editedCategories.isEmpty() || imageUrls.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields and select at least one category and one image", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Show progress dialog while updating
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Updating...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
+        // Find images to delete
         List<String> originalImageUrls = getIntent().getStringArrayListExtra("placeImages");
         for (String originalUrl : originalImageUrls) {
             if (!imageUrls.contains(originalUrl)) {
@@ -266,11 +322,14 @@ public class EditPlaceActivity extends AppCompatActivity {
             }
         }
 
+        // Delete images from storage
         deleteImagesFromStorage(imagesToDelete);
 
+        // Update place data
         updatePlaceData(editedPlaceName, editedPlaceDesc, editedCategories, progressDialog);
     }
 
+    // Method to delete images from storage
     private void deleteImagesFromStorage(List<String> imagesToDelete) {
         for (String imageUrl : imagesToDelete) {
             StorageReference imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
@@ -280,6 +339,7 @@ public class EditPlaceActivity extends AppCompatActivity {
         }
     }
 
+    // Method to update place data
     private void updatePlaceData(String editedPlaceName, String editedPlaceDesc,
                                  List<String> editedCategories,
                                  ProgressDialog progressDialog) {

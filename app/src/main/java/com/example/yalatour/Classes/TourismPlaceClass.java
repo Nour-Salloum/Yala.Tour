@@ -9,18 +9,22 @@ public class TourismPlaceClass {
     private List<String> placeCategories;
     private List<String> placeImages;
     private String cityName;
+    private float totalRating;
+
 
     public TourismPlaceClass() {
         // Required empty constructor for Firestore
     }
 
-    public TourismPlaceClass(String placeId, String placeName, String placeDescription, List<String> placeCategories, List<String> placeImages, String cityName) {
+    public TourismPlaceClass(String placeId, String placeName, String placeDescription, List<String> placeCategories, List<String> placeImages, String cityName, float totalRating) {
         this.placeId = placeId;
         this.placeName = placeName;
         this.placeDescription = placeDescription;
         this.placeCategories = placeCategories;
         this.placeImages = placeImages;
         this.cityName = cityName;
+        this.totalRating = totalRating;
+
     }
 
     public String getPlaceId() {
@@ -70,4 +74,14 @@ public class TourismPlaceClass {
     public void setCityName(String cityName) {
         this.cityName = cityName;
     }
+
+    public float getTotalRating() {
+        return totalRating;
+    }
+
+    public void setTotalRating(float totalRating) {
+        this.totalRating = totalRating;
+    }
+
+
 }

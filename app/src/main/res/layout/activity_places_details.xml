@@ -1,116 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DetailsActivity.PlacesDetails">
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:background="@drawable/upload"
-        android:id="@+id/PlaceImageView"
         android:orientation="vertical"
-        >
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/placeholder"
-            android:id="@+id/Location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
+        <RelativeLayout
+            android:id="@+id/PlaceImageView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:orientation="vertical">
 
+            <!-- Your existing content inside PlaceImageView RelativeLayout -->
+            <ImageView
+                android:id="@+id/backgroundImageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
 
-            />
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/add"
-            android:id="@+id/AddToTrip"
-            />
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/heart"
-            android:id="@+id/AddToFavorite"
-            />
+            <ImageButton
+                android:id="@+id/Location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:background="@null"
+                android:padding="10dp"
+                android:src="@drawable/placeholder" />
 
-</LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Place Name"
-        android:id="@+id/PlaceName"
-        android:layout_below="@+id/PlaceImageView"
-        android:layout_marginTop="5dp"
-        android:textSize="30sp"
-        />
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+            <ImageButton
+                android:id="@+id/AddToTrip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/Location"
+                android:background="@null"
+                android:padding="10dp"
+                android:src="@drawable/add" />
 
-        android:layout_below="@+id/PlaceName"
-        android:id="@+id/Titles">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/PlaceDescription"
-        android:text="Description"
-        android:layout_marginTop="20dp"
-        android:textSize="18sp"
-        android:layout_marginLeft="10dp"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/PlaceImages"
-        android:text="Images"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="10dp"
-        android:textSize="18sp"/>
+            <ImageButton
+                android:id="@+id/AddToFavorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/AddToTrip"
+                android:background="@null"
+                android:padding="10dp"
+                android:src="@drawable/heart" />
+
+            <LinearLayout
+                android:id="@+id/indicatorLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:orientation="horizontal" />
+        </RelativeLayout>
+
         <TextView
+            android:id="@+id/PlaceName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/PlaceReviews"
-            android:text="Rating and Reviews"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="10dp"
-            android:textSize="18sp"/>
-
-</LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/Details"
-        android:layout_marginTop="30dp"
-        android:layout_below="@+id/Titles"
-        android:orientation="vertical">
-
-        <ScrollView
+            android:layout_marginTop="5dp"
+            android:text="Place Name"
+            android:textSize="30sp" />
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="5dp"
-            android:scrollbars="none">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <TextView
 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Rate:" />
+
+        <TextView
+            android:id="@+id/PlaceRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/Details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="30dp">
+
+            <TextView
+                android:id="@+id/Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Place Description" />
+            <TextView
+                android:id="@+id/RateThePlace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rate The Place"
+                android:layout_marginTop="5dp"/>
+
+            <!-- RatingBar placed directly under Description -->
+            <RatingBar
+                android:id="@+id/placeRatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:rating="0"
+                android:stepSize="1"
+                android:layout_marginTop="10dp" />
+
+            <!-- Your existing RecyclerView below RatingBar -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/Review_RecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ See all Reviews"
+                android:id="@+id/AllReviews"
+                />
+
+            <!-- EditText and Button below RecyclerView -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp">
 
-                <LinearLayout
-                    android:id="@+id/ImagesLayout"
-                    android:layout_width="match_parent"
+                <EditText
+                    android:id="@+id/ReviewText"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/Titles"
-                    android:orientation="horizontal" >
-                </LinearLayout>
+                    android:layout_weight="1"
+                    android:hint="Write a review" />
 
-                <TextView
+                <Button
+                    android:id="@+id/Send"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/Description"
-                    android:text="Place Description"/>
+                    android:text="Send" />
             </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
+
     </LinearLayout>
-</RelativeLayout>
+</androidx.core.widget.NestedScrollView>

@@ -61,6 +61,7 @@ public class TourismPlaces extends AppCompatActivity {
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             String isAdmin = documentSnapshot.getString("isAdmin");
+                            Log.d("UserAuthentication", "isAdmin value: " + isAdmin);
 
                             // Show or hide FAB based on admin status
                             if (isAdmin != null && isAdmin.equals("1")) {
@@ -71,7 +72,7 @@ public class TourismPlaces extends AppCompatActivity {
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // Handle failure to fetch user data
+                        Log.e("TourismPlaces", "Failed to fetch user data", e);
                     });
         } else {
             // User is not signed in, handle accordingly
