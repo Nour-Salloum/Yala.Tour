@@ -1,6 +1,7 @@
 package com.example.yalatour.Classes;
 
 import java.util.List;
+import java.util.Objects;
 
 public class TourismPlaceClass {
     private String placeId; // New field
@@ -83,5 +84,16 @@ public class TourismPlaceClass {
         this.totalRating = totalRating;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TourismPlaceClass that = (TourismPlaceClass) o;
+        return Float.compare(totalRating, that.totalRating) == 0 && Objects.equals(placeId, that.placeId) && Objects.equals(placeName, that.placeName) && Objects.equals(placeDescription, that.placeDescription) && Objects.equals(placeCategories, that.placeCategories) && Objects.equals(placeImages, that.placeImages) && Objects.equals(cityName, that.cityName);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(placeId, placeName, placeDescription, placeCategories, placeImages, cityName, totalRating);
+    }
 }

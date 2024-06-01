@@ -30,6 +30,8 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.yalatour.Activities.CityActivity;
 import com.example.yalatour.Activities.FullScreenImageActivity;
+import com.example.yalatour.Activities.PlaceinTrip;
+import com.example.yalatour.Activities.SelectingPlacesActivity;
 import com.example.yalatour.Adapters.MyAdapter;
 import com.example.yalatour.Adapters.ReviewAdapter;
 import com.example.yalatour.Classes.CityClass;
@@ -195,21 +197,22 @@ public class PlacesDetails extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            int isUser = documentSnapshot.getLong("isUser").intValue();
+                            Boolean isUser = documentSnapshot.getBoolean("user");
 
 
 
                             // Show or hide FAB based on admin status
-                            if (isUser != 0 && isUser==1) {
-                                ReviewText.setVisibility(View.VISIBLE);
-                                Send.setVisibility(View.VISIBLE);
-                                PlaceRating.setVisibility(View.VISIBLE);
-                                RateThePlace.setVisibility(View.VISIBLE);
-                            } else {
+                            if (isUser != null && isUser==false) {
                                 ReviewText.setVisibility(View.GONE);
                                 Send.setVisibility(View.GONE);
                                 PlaceRating.setVisibility(View.GONE);
                                 RateThePlace.setVisibility(View.GONE);
+                            } else {
+
+                                ReviewText.setVisibility(View.VISIBLE);
+                                Send.setVisibility(View.VISIBLE);
+                                PlaceRating.setVisibility(View.VISIBLE);
+                                RateThePlace.setVisibility(View.VISIBLE);
                             }
                         }
                     })
@@ -219,6 +222,14 @@ public class PlacesDetails extends AppCompatActivity {
         } else {
             // User is not signed in, handle accordingly
         }
+        Add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(PlacesDetails.this, PlaceinTrip.class);
+                intent.putExtra("PlaceId", PlaceId);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -249,7 +260,7 @@ public class PlacesDetails extends AppCompatActivity {
                 handler.postDelayed(this, 3000); // Change image every 3 seconds
             }
         };
-        handler.postDelayed(runnable, 3000); // Start auto sliding after 3 seconds
+        handler.postDelayed(runnable, 0);
     }
     // Method to create an individual indicator
     private ImageView createIndicator() {

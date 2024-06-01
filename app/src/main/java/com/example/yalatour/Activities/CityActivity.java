@@ -1,16 +1,18 @@
 package com.example.yalatour.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import com.example.yalatour.Adapters.MyAdapter;
+import com.example.yalatour.Adapters.TourismPlaceAdapter;
 import com.example.yalatour.Classes.CityClass;
+import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -25,9 +27,16 @@ import java.util.List;
 public class CityActivity extends AppCompatActivity {
 
     private FloatingActionButton fab;
-    private RecyclerView recyclerView;
+    private RecyclerView cityRecyclerView;
+    private RecyclerView placeRecyclerView;
     private List<CityClass> cityList;
+    private List<CityClass> filteredCityList;
+    private List<TourismPlaceClass> placeList;
+    private List<TourismPlaceClass> filteredPlaceList;
+    private SearchView searchView;
     private FirebaseFirestore db;
+    private MyAdapter cityAdapter;
+    private TourismPlaceAdapter placeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,82 +44,130 @@ public class CityActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city);
 
         fab = findViewById(R.id.fab);
-        recyclerView = findViewById(R.id.recyclerView);
-        // Fetch current user's data and check admin status
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        cityRecyclerView = findViewById(R.id.cityRecyclerView);
+        placeRecyclerView = findViewById(R.id.placeRecyclerView);
+        searchView = findViewById(R.id.searchView);
 
+        db = FirebaseFirestore.getInstance();
+        cityList = new ArrayList<>();
+        filteredCityList = new ArrayList<>();
+        placeList = new ArrayList<>();
+        filteredPlaceList = new ArrayList<>();
+
+        cityAdapter = new MyAdapter(this, filteredCityList);
+        placeAdapter = new TourismPlaceAdapter(this, filteredPlaceList);
+
+        cityRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+        placeRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+
+        cityRecyclerView.setAdapter(cityAdapter);
+        placeRecyclerView.setAdapter(placeAdapter);
+
+        setupFab();
+        fetchCitiesAndPlaces();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterData(newText);
+                return true;
+            }
+        });
+    }
+
+    private void setupFab() {
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(CityActivity.this, UploadActivity.class);
+            startActivity(intent);
+        });
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             String userId = currentUser.getUid();
-
             db.collection("Users").document(userId)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String isAdmin = documentSnapshot.getString("isAdmin");
-
-                            // Show or hide FAB based on admin status
-                            if (isAdmin != null && isAdmin.equals("1")) {
-                                fab.setVisibility(View.VISIBLE);
-                            } else {
-                                fab.setVisibility(View.GONE);
-                            }
+                            Boolean isAdmin = documentSnapshot.getBoolean("admin");
+                            fab.setVisibility(isAdmin != null && isAdmin ? View.VISIBLE : View.GONE);
                         }
                     })
                     .addOnFailureListener(e -> {
-                        // Handle failure to fetch user data
+                        // Handle error
                     });
         } else {
-            // User is not signed in, handle accordingly
+            fab.setVisibility(View.GONE);
         }
+    }
 
-
-
-
-        // Setting up RecyclerView with GridLayoutManager
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(CityActivity.this, 1);
-        recyclerView.setLayoutManager(gridLayoutManager);
-
-        // Showing progress dialog while fetching data
-        AlertDialog.Builder builder = new AlertDialog.Builder(CityActivity.this);
-        builder.setCancelable(false);
-        builder.setView(R.layout.activity_progress);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        cityList = new ArrayList<>();
-
-        // Creating adapter and setting it to RecyclerView
-        MyAdapter adapter = new MyAdapter(CityActivity.this, cityList);
-        recyclerView.setAdapter(adapter);
-
-        // Fetching data from Firestore
+    private void fetchCitiesAndPlaces() {
         db.collection("Cities")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        cityList.clear(); // Clear existing data (optional)
+                        cityList.clear();
                         for (DocumentSnapshot document : task.getResult()) {
-                            CityClass cityClass = document.toObject(CityClass.class);
-                            cityList.add(cityClass);
+                            CityClass city = document.toObject(CityClass.class);
+                            cityList.add(city);
                         }
-                        adapter.notifyDataSetChanged();
-                        dialog.dismiss();
-                    } else {
-                        dialog.dismiss();
-                        // Handle errors
+                        filteredCityList.addAll(cityList);
+                        cityAdapter.notifyDataSetChanged();
                     }
                 });
 
-
-        // Handling FAB click
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(CityActivity.this, UploadActivity.class);
-                startActivity(intent);
-            }
-        });
+        db.collection("TourismPlaces")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        placeList.clear();
+                        for (DocumentSnapshot document : task.getResult()) {
+                            TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
+                            placeList.add(place);
+                        }
+                        filteredPlaceList.addAll(placeList);
+                        placeAdapter.notifyDataSetChanged();
+                    }
+                });
     }
+
+    private void filterData(String query) {
+        filteredCityList.clear();
+        filteredPlaceList.clear();
+
+        if (query.isEmpty()) {
+            filteredCityList.addAll(cityList);
+            placeRecyclerView.setVisibility(View.GONE);
+            cityRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            for (CityClass city : cityList) {
+                if (city.getCityTitle().toLowerCase().contains(query.toLowerCase())) {
+                    filteredCityList.add(city);
+                }
+            }
+
+            for (TourismPlaceClass place : placeList) {
+                if (place.getPlaceName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredPlaceList.add(place);
+                }
+            }
+
+            if (!filteredPlaceList.isEmpty()) {
+                placeRecyclerView.setVisibility(View.VISIBLE);
+                cityRecyclerView.setVisibility(View.GONE);
+            } else {
+                placeRecyclerView.setVisibility(View.GONE);
+                cityRecyclerView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        cityAdapter.notifyDataSetChanged();
+        placeAdapter.notifyDataSetChanged();
+    }
+
 }

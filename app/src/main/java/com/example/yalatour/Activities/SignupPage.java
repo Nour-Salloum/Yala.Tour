@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.yalatour.Classes.User;
 import com.example.yalatour.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,19 +22,22 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SignupPage extends AppCompatActivity {
-    private  EditText email, password, username;
+    private EditText email, password, username;
     private Button Signup;
-    private boolean valid = true;
     private TextView gotoLogin, passwordRequirement;
     private ToggleButton ShowPass;
+    List<String> fcmTokenList;
     private int savedCursorPosition = 0;
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
@@ -54,46 +58,43 @@ public class SignupPage extends AppCompatActivity {
         // Initialize Firebase components
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
+        fcmTokenList=new ArrayList<>();
 
         // Signup button click listener
         Signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Check if fields are not empty
-                checkField(username);
-                checkField(email);
-                // Check if password meets minimum length requirement
-                if (checkField(password)) {
+                if (checkField(username) && checkField(email) && checkField(password)) {
+                    // Check if password meets minimum length requirement
                     if (password.getText().toString().length() < 6) {
                         passwordRequirement.setText("Password should be at least 6 characters");
                         return;
                     } else {
                         passwordRequirement.setText("");
                     }
-                } else {
-                    return;
-                }
 
-                // Check if the email already exists
-                fAuth.fetchSignInMethodsForEmail(email.getText().toString())
-                        .addOnSuccessListener(new OnSuccessListener<SignInMethodQueryResult>() {
-                            @Override
-                            public void onSuccess(SignInMethodQueryResult signInMethodQueryResult) {
-                                if (signInMethodQueryResult.getSignInMethods().size() > 0) {
-                                    // Email already exists
-                                    Toast.makeText(SignupPage.this, "An account already exists with this email", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    // Email doesn't exist, create user account
-                                    createUserAccount();
+                    // Check if the email already exists
+                    fAuth.fetchSignInMethodsForEmail(email.getText().toString())
+                            .addOnSuccessListener(new OnSuccessListener<SignInMethodQueryResult>() {
+                                @Override
+                                public void onSuccess(SignInMethodQueryResult signInMethodQueryResult) {
+                                    if (signInMethodQueryResult.getSignInMethods().size() > 0) {
+                                        // Email already exists
+                                        Toast.makeText(SignupPage.this, "An account already exists with this email", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // Email doesn't exist, create user account
+                                        createUserAccount();
+                                    }
                                 }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Failed to check email existence
-                                Toast.makeText(SignupPage.this, "Failed to check email existence", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    // Failed to check email existence
+                                    Toast.makeText(SignupPage.this, "Failed to check email existence", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
             }
         });
 
@@ -128,19 +129,43 @@ public class SignupPage extends AppCompatActivity {
             @Override
             public void onSuccess(AuthResult authResult) {
                 // User account created successfully
-                FirebaseUser user = fAuth.getCurrentUser();
-                Toast.makeText(SignupPage.this, "Account Created", Toast.LENGTH_SHORT).show();
-                // Store user information in Firestore
-                DocumentReference df = fStore.collection("Users").document(user.getUid());
-                Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("Username", username.getText().toString());
-                userInfo.put("Email", email.getText().toString());
-                userInfo.put("isUser", 1);
-                df.set(userInfo);
-                // Redirect to home page
-                Intent intent = new Intent(SignupPage.this, HomePage.class);
-                startActivity(intent);
-                finish();
+                FirebaseUser firebaseUser = fAuth.getCurrentUser();
+                String userId = firebaseUser.getUid();
+
+                // Get FCM token
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                String fcmToken = task.getResult();
+                                fcmTokenList.add(fcmToken);
+
+                                // Create User object with FCM token
+                                User user = new User(username.getText().toString(), email.getText().toString(), true, fcmTokenList);
+
+                                // Store user information in Firestore
+                                DocumentReference userRef = fStore.collection("Users").document(userId);
+                                userRef.set(user)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                // Account created successfully
+                                                Toast.makeText(SignupPage.this, "Account Created", Toast.LENGTH_SHORT).show();
+                                                Intent intent = new Intent(SignupPage.this, HomePage.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(SignupPage.this, "Failed to create user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            } else {
+                                // Handle error
+                                Toast.makeText(SignupPage.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -157,13 +182,11 @@ public class SignupPage extends AppCompatActivity {
 
     // Method to check if the field is empty
     public boolean checkField(EditText textField) {
+        boolean valid = true;
         if (textField.getText().toString().isEmpty()) {
             textField.setError("Could not be empty");
             valid = false;
-        } else {
-            valid = true;
         }
-
         return valid;
     }
 }

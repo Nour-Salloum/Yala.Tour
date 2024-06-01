@@ -27,7 +27,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    packagingOptions {
+        resources {
+            excludes += setOf("META-INF/DEPENDENCIES")
+        }
+    }
 }
+
 
 dependencies {
 
@@ -39,6 +45,11 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.3")
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("androidx.activity:activity:1.8.0")
+    implementation ("com.google.firebase:firebase-messaging:23.0.5")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation ("com.google.guava:guava:30.1.1-jre")
+
+    implementation("com.android.volley:volley:1.2.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

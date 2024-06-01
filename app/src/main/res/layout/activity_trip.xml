@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.TripActivity"
+    >
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/SearchTrip"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/search_style"
+        app:iconifiedByDefault="false"
+        app:queryHint="Search Trips.."
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="70dp">
+
+        <TextView
+            android:id="@+id/MyTrips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="My Trips"
+            android:clickable="true"  android:onClick="onCategoryClick" />
+        <TextView
+            android:id="@+id/JoinedTrips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="Joined Trips"
+            android:clickable="true"  android:onClick="onCategoryClick" />
+        <TextView
+            android:id="@+id/RequestedTrips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="Requested Trips"
+            android:clickable="true"  android:onClick="onCategoryClick" />
+
+        <TextView
+            android:id="@+id/AllTrips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="All Trips"
+            android:clickable="true"  android:onClick="onCategoryClick" />
+
+
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TriprecyclerView"
+        android:scrollbars="vertical"
+        android:layout_marginTop="90dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/AddTrip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="@color/lavender"
+        android:src="@drawable/baseline_add_24"
+        android:tint="@color/white" />
+</RelativeLayout>

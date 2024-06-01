@@ -1,6 +1,7 @@
 package com.example.yalatour.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,10 +29,13 @@ import java.util.List;
 
 public class TourismPlaces extends AppCompatActivity {
 
-    FloatingActionButton addPlace;
-    RecyclerView recyclerView;
-    List<TourismPlaceClass> placeList;
-    String cityName;
+    private FloatingActionButton addPlace;
+    private RecyclerView recyclerView;
+    private List<TourismPlaceClass> placeList;
+    private List<TourismPlaceClass> filteredplaceList;
+    private String cityName;
+    private SearchView PlaceSearch;
+    TourismPlaceAdapter adapter;
     private static final int UPLOAD_REQUEST_CODE = 123;
     private static final int EDIT_REQUEST_CODE = 1234;
 
@@ -42,10 +46,14 @@ public class TourismPlaces extends AppCompatActivity {
 
         addPlace = findViewById(R.id.Addplace);
         recyclerView = findViewById(R.id.PlacerecyclerView);
+        PlaceSearch=findViewById(R.id.PlacesearchView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         cityName = getIntent().getStringExtra("cityName");
         placeList = new ArrayList<>();
+        filteredplaceList = new ArrayList<>();
+        adapter = new TourismPlaceAdapter(TourismPlaces.this, filteredplaceList, cityName);
+        recyclerView.setAdapter(adapter);
 
         // Fetch and display only places belonging to the selected city
         fetchPlaces();
@@ -60,11 +68,11 @@ public class TourismPlaces extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String isAdmin = documentSnapshot.getString("isAdmin");
-                            Log.d("UserAuthentication", "isAdmin value: " + isAdmin);
+                            Boolean isUser = documentSnapshot.getBoolean("user");
+
 
                             // Show or hide FAB based on admin status
-                            if (isAdmin != null && isAdmin.equals("1")) {
+                            if (isUser != null && isUser==false) {
                                 addPlace.setVisibility(View.VISIBLE);
                             } else {
                                 addPlace.setVisibility(View.GONE);
@@ -86,39 +94,41 @@ public class TourismPlaces extends AppCompatActivity {
                 startActivityForResult(intent, UPLOAD_REQUEST_CODE); // Start the activity for result
             }
         });
+        PlaceSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterPlaces(newText);
+                return true;
+            }
+        });
     }
 
 
     private void fetchPlaces() {
-        // Fetch places from Firestore for the selected city
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Query query = db.collection("TourismPlaces").whereEqualTo("cityName", cityName);  // Optimized query
+        Query query = db.collection("TourismPlaces").whereEqualTo("cityName", cityName);
 
         query.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         placeList.clear();
+                        filteredplaceList.clear(); // Also clear the filtered list
                         for (DocumentSnapshot document : task.getResult()) {
                             TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
                             if (place != null) {
                                 placeList.add(place);
+                                filteredplaceList.add(place); // Add to filtered list as well
                             }
                         }
-
-                        // Update the adapter
-                        TourismPlaceAdapter adapter = (TourismPlaceAdapter) recyclerView.getAdapter();
-                        if (adapter != null) {
-                            Log.d("TourismPlaces", "Place list updated, notifying adapter: " + placeList.size());  // Add logging
-                            adapter.notifyDataSetChanged();
-                        } else {
-                            // Create adapter and set it to RecyclerView
-                            adapter = new TourismPlaceAdapter(TourismPlaces.this, placeList, cityName);
-                            recyclerView.setAdapter(adapter);
-                        }
+                        adapter.notifyDataSetChanged();
                     } else {
-                        // Handle errors
                         Toast.makeText(TourismPlaces.this, "Failed to fetch places", Toast.LENGTH_SHORT).show();
-                        Log.e("TourismPlaces", "Error fetching places", task.getException());  // Add error logging
+                        Log.e("TourismPlaces", "Error fetching places", task.getException());
                     }
                 });
     }
@@ -149,6 +159,18 @@ public class TourismPlaces extends AppCompatActivity {
         fetchPlaces();
     }
 
-
+   public void filterPlaces(String query) {
+        filteredplaceList.clear();
+        if (query.isEmpty()) {
+            filteredplaceList.addAll(placeList);
+        } else {
+            for (TourismPlaceClass place : placeList) {
+                if (place.getPlaceName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredplaceList.add(place);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
+   }
 
 }

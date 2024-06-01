@@ -49,6 +49,12 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         this.placeList = placeList;
         this.selectedCity = selectedCity;
     }
+    public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList) {
+        this.context = context;
+        this.placeList = placeList;
+
+    }
+
 
     @NonNull
     @Override
@@ -60,7 +66,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TourismPlaceClass place = placeList.get(position);
-        if (place.getCityName().equals(selectedCity)) {
+
             holder.placeTitle.setText(place.getPlaceName());
             Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
             holder.placeCard.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +81,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     context.startActivity(intent);
                 }
             });
-        }
+
         holder.EditPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,11 +129,11 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            String isAdmin = documentSnapshot.getString("isAdmin");
-                            Log.d("UserAuthentication", "isAdmin value: " + isAdmin);
+                            Boolean isUser = documentSnapshot.getBoolean("user");
+
 
                             // Show or hide FAB based on admin status
-                            if (isAdmin != null && isAdmin.equals("1")) {
+                            if (isUser != null && isUser==false){
                                 holder.EditPlace.setVisibility(View.VISIBLE);
                                 holder.Delete.setVisibility(View.VISIBLE);
 
