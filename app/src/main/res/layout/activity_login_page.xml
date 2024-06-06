@@ -1,63 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:visibility="visible"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@drawable/rauche_rock">
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="24dp"
-        android:id="@+id/user_email"
-        android:hint="Enter Email"
-        android:inputType="textEmailAddress"
-        />
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        >
+
         <EditText
+            android:layout_width="330dp"
+            android:layout_height="50dp"
+            android:id="@+id/user_email"
+            android:drawableLeft="@drawable/baseline_mail_24"
+            android:background="@drawable/back_border"
+            android:padding="15dp"
+            android:hint="Enter Email"
+            android:inputType="textEmailAddress"
+            android:layout_marginTop="20dp"
+            />
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="24dp"
-            android:id="@+id/user_passsword"
-            android:hint="Enter Password"
-            android:inputType="textPassword"
+            >
+
+
+
+            <EditText
+                android:layout_width="330dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:padding="15dp"
+                android:id="@+id/user_password"
+                android:hint="Enter Password"
+                android:inputType="textPassword"
+                android:drawableLeft="@drawable/baseline_lock_24"
+                android:background="@drawable/back_border"
+                />
+
+            <ToggleButton
+                android:id="@+id/toggleButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="-50dp"
+                android:layout_marginTop="30dp"
+                android:layout_toRightOf="@+id/user_password"
+                android:text=""
+                android:textOff=""
+                android:textOn="" />
+        </RelativeLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/invalidCredentialsMessage"
             />
-        <ToggleButton
-            android:id="@+id/toggleButton"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_toRightOf="@+id/user_passsword"
-            android:layout_marginTop="50dp"
-            android:text=""
-            android:textOn=""
-            android:textOff=""
+        <Button
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:id="@+id/Login"
+            android:text="@string/Login"
+            android:backgroundTint="@color/dark_blue"
 
             />
-    </RelativeLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/invalidCredentialsMessage"
-        />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/Login"
-        android:text="@string/Login"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="24dp"
-        android:id="@+id/signupRedirectText"
-        android:text="Not yet registered? Sign Up"
-        android:textSize="18dp"
-        android:textStyle="bold"
-        />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:id="@+id/signupRedirectText"
+            android:text="Not yet registered? Sign Up"
+            android:textSize="12dp"
+            android:textColor="@color/black"
+
+            />
 
 
-</LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
