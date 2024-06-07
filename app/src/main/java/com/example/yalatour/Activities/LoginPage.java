@@ -44,7 +44,7 @@ public class LoginPage extends AppCompatActivity {
         setContentView(R.layout.activity_login_page);
         // Initialize UI elements
         email = findViewById(R.id.user_email);
-        password = findViewById(R.id.user_passsword);
+        password = findViewById(R.id.user_password);
         Login = findViewById(R.id.Login);
         gotoRegister = findViewById(R.id.signupRedirectText);
         invalidCredentialsMessage = findViewById(R.id.invalidCredentialsMessage);
