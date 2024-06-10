@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +20,8 @@ import com.example.yalatour.R;
 public class DetailActivity extends AppCompatActivity {
     TextView detailDesc, detailTitle;
     ImageView detailImage;
-    Button showHotelsButton,showHospitalsButton,showRestaurantsButton,showTourismPlacesButton;
+    Button showTourismPlacesButton;
+    ImageButton showHotelsButton,showHospitalsButton,showRestaurantsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
