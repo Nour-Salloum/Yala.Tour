@@ -50,7 +50,7 @@ public class SignupPage extends AppCompatActivity {
         // Initialize UI elements
         email = findViewById(R.id.user_email);
         username = findViewById(R.id.user_name);
-        password = findViewById(R.id.user_passsword);
+        password = findViewById(R.id.user_password);
         Signup = findViewById(R.id.Signup);
         gotoLogin = findViewById(R.id.loginRedirectText);
         passwordRequirement = findViewById(R.id.passwordRequirement);
