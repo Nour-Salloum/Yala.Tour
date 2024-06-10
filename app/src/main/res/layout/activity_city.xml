@@ -1,10 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.MainActivity">
+    tools:context=".Activities.MainActivity"
+    android:background="@drawable/rauche_rock"
+    >
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchView"
@@ -24,6 +27,7 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:layout_marginTop="70dp"
+        android:layout_marginBottom="75dp"
         />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -41,8 +45,87 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/lavender"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginVertical="90dp"
+        android:backgroundTint="@color/dark_blue"
         android:src="@drawable/baseline_add_24"
         android:tint="@color/white" />
+
+
+    <!-- Buttons Layout -->
+    <LinearLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+
+        <!-- Home Button -->
+        <ImageButton
+            android:id="@+id/HomeButton"
+            android:layout_width="82dp"
+            android:layout_height="60dp"
+            android:background="@drawable/back_border"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_home_24"
+            android:adjustViewBounds="true"
+            android:layout_marginBottom="7dp" />
+
+        <!-- Trips Button -->
+        <ImageButton
+            android:id="@+id/TripsButton"
+            android:layout_width="82dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="0.5dp"
+            android:background="@drawable/back_border"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_directions_car_24"
+            android:layout_marginBottom="7dp"/>
+
+        <!-- Cities Button -->
+        <ImageButton
+            android:id="@+id/CitiesButton"
+            android:layout_width="82dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="0.5dp"
+            android:background="@drawable/back_border"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_location_city_24"
+            android:layout_marginBottom="7dp"/>
+
+        <!-- Favorites Button -->
+        <ImageButton
+            android:id="@+id/favoritesButton"
+            android:layout_width="82dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="0.5dp"
+            android:background="@drawable/back_border"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_favorite_24"
+            android:layout_marginBottom="7dp"/>
+
+        <!-- Profile Button -->
+        <ImageButton
+            android:id="@+id/profile_button"
+            android:layout_width="82dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="0.5dp"
+            android:background="@drawable/back_border"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/baseline_person_24"
+            android:layout_marginBottom="7dp"/>
+    </LinearLayout>
 </RelativeLayout>
