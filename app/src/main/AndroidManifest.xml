@@ -42,6 +42,9 @@
         <activity
             android:name=".UploadActivities.UploadPlaceActivity"
             android:exported="false" />
+
+        <activity android:name=".UploadActivities.UploadPostActivity"></activity>
+
         <activity
             android:name=".Activities.FavoritePage"
             android:exported="false" />
