@@ -29,7 +29,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.yalatour.Activities.CityActivity;
-import com.example.yalatour.Activities.FullScreenImageActivity;
 import com.example.yalatour.Activities.PlaceinTrip;
 import com.example.yalatour.Activities.SelectingPlacesActivity;
 import com.example.yalatour.Adapters.MyAdapter;

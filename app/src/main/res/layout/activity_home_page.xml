@@ -83,7 +83,7 @@
 
         <!-- Profile Button -->
         <ImageButton
-            android:id="@+id/ProfileButton"
+            android:id="@+id/profile_button"
             android:layout_width="82dp"
             android:layout_height="60dp"
             android:layout_marginLeft="0.5dp"

@@ -54,78 +54,16 @@
         android:tint="@color/white" />
 
 
-    <!-- Buttons Layout -->
-    <LinearLayout
-        android:id="@+id/buttonsLayout"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/transparent"
+        app:itemIconTint="#5A93C5"
+        app:itemBackground="@drawable/icon_border"
+        app:itemIconSize="35dp"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
 
-
-        <!-- Home Button -->
-        <ImageButton
-            android:id="@+id/HomeButton"
-            android:layout_width="82dp"
-            android:layout_height="60dp"
-            android:background="@drawable/back_border"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/baseline_home_24"
-            android:adjustViewBounds="true"
-            android:layout_marginBottom="7dp" />
-
-        <!-- Trips Button -->
-        <ImageButton
-            android:id="@+id/TripsButton"
-            android:layout_width="82dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="0.5dp"
-            android:background="@drawable/back_border"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/baseline_directions_car_24"
-            android:layout_marginBottom="7dp"/>
-
-        <!-- Cities Button -->
-        <ImageButton
-            android:id="@+id/CitiesButton"
-            android:layout_width="82dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="0.5dp"
-            android:background="@drawable/back_border"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/baseline_location_city_24"
-            android:layout_marginBottom="7dp"/>
-
-        <!-- Favorites Button -->
-        <ImageButton
-            android:id="@+id/favoritesButton"
-            android:layout_width="82dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="0.5dp"
-            android:background="@drawable/back_border"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/baseline_favorite_24"
-            android:layout_marginBottom="7dp"/>
-
-        <!-- Profile Button -->
-        <ImageButton
-            android:id="@+id/profile_button"
-            android:layout_width="82dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="0.5dp"
-            android:background="@drawable/back_border"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/baseline_person_24"
-            android:layout_marginBottom="7dp"/>
-    </LinearLayout>
 </RelativeLayout>

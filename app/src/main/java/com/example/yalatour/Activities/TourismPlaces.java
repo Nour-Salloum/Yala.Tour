@@ -10,27 +10,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.yalatour.Adapters.TourismPlaceAdapter;
 import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.DetailsActivity.DetailActivity;
-import com.example.yalatour.DetailsActivity.PlacesDetails;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadPlaceActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TourismPlaces extends AppCompatActivity {
 
@@ -41,10 +36,8 @@ public class TourismPlaces extends AppCompatActivity {
     private String cityName;
     private SearchView PlaceSearch;
     TourismPlaceAdapter adapter;
-
     private static final int UPLOAD_REQUEST_CODE = 123;
     private static final int EDIT_REQUEST_CODE = 1234;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +48,6 @@ public class TourismPlaces extends AppCompatActivity {
         recyclerView = findViewById(R.id.PlacerecyclerView);
         PlaceSearch=findViewById(R.id.PlacesearchView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
 
         cityName = getIntent().getStringExtra("cityName");
         placeList = new ArrayList<>();
@@ -76,22 +68,15 @@ public class TourismPlaces extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            Boolean isUser = documentSnapshot.getBoolean("user");
-
-
-                            // Show or hide FAB based on admin status
-                            if (isUser != null && isUser==false) {
-                                addPlace.setVisibility(View.VISIBLE);
-                            } else {
-                                addPlace.setVisibility(View.GONE);
-                            }
+                            Boolean isAdmin = documentSnapshot.getBoolean("admin");
+                            addPlace.setVisibility(isAdmin != null && isAdmin ? View.VISIBLE : View.GONE);
                         }
                     })
                     .addOnFailureListener(e -> {
                         Log.e("TourismPlaces", "Failed to fetch user data", e);
                     });
         } else {
-            // User is not signed in, handle accordingly
+            addPlace.setVisibility(View.GONE);
         }
 
         addPlace.setOnClickListener(new View.OnClickListener() {
@@ -114,8 +99,6 @@ public class TourismPlaces extends AppCompatActivity {
                 return true;
             }
         });
-
-
     }
 
 
@@ -169,7 +152,7 @@ public class TourismPlaces extends AppCompatActivity {
         fetchPlaces();
     }
 
-   public void filterPlaces(String query) {
+    public void filterPlaces(String query) {
         filteredplaceList.clear();
         if (query.isEmpty()) {
             filteredplaceList.addAll(placeList);
@@ -181,6 +164,6 @@ public class TourismPlaces extends AppCompatActivity {
             }
         }
         adapter.notifyDataSetChanged();
-   }
+    }
 
 }

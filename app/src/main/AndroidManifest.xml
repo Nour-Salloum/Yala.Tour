@@ -23,6 +23,9 @@
         android:theme="@style/Theme.YalaTour"
         tools:targetApi="31">
         <activity
+            android:name=".Activities.FullScreenMediaActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.PlaceinTrip"
             android:exported="false" />
         <activity
@@ -43,13 +46,10 @@
         <activity
             android:name=".UploadActivities.UploadPlaceActivity"
             android:exported="false" />
-
-        <activity android:name=".UploadActivities.UploadPostActivity"></activity>
-
+        <activity android:name=".UploadActivities.UploadPostActivity" />
         <activity
             android:name=".Activities.FavoritePage"
             android:exported="false" />
-
         <activity
             android:name=".Adapters.TourismPlaceAdapter"
             android:exported="false" />

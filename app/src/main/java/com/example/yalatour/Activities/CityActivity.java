@@ -1,12 +1,15 @@
 package com.example.yalatour.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.media3.common.C;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.example.yalatour.Adapters.MyAdapter;
@@ -15,6 +18,7 @@ import com.example.yalatour.Classes.CityClass;
 import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,6 +41,7 @@ public class CityActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private MyAdapter cityAdapter;
     private TourismPlaceAdapter placeAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +67,14 @@ public class CityActivity extends AppCompatActivity {
 
         cityRecyclerView.setAdapter(cityAdapter);
         placeRecyclerView.setAdapter(placeAdapter);
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+        bottomNav.getMenu().setGroupCheckable(0, true, false);
+        for (int i = 0; i < bottomNav.getMenu().size(); i++) {
+            bottomNav.getMenu().getItem(i).setChecked(false);
+        }
 
         setupFab();
         fetchCitiesAndPlaces();
@@ -169,5 +182,33 @@ public class CityActivity extends AppCompatActivity {
         cityAdapter.notifyDataSetChanged();
         placeAdapter.notifyDataSetChanged();
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(CityActivity.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(CityActivity.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(CityActivity.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(CityActivity.this, FavoriteActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(CityActivity.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
 
 }

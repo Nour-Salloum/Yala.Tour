@@ -4,10 +4,12 @@ import static android.content.ContentValues.TAG;
 
 import android.app.Dialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -15,6 +17,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -23,16 +26,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.yalatour.Adapters.TripAdapter;
 import com.example.yalatour.Classes.TripClass;
 import com.example.yalatour.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,7 +56,7 @@ public class TripActivity extends AppCompatActivity {
     private SearchView SearchTrip;
     private String currentCategory = "MyTrips";
 
-    String currentuserId;
+    private String currentuserId;
     private boolean isFirstLoad = true;
 
     @Override
@@ -69,6 +76,12 @@ public class TripActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         currentuserId = currentUser.getUid();
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+        bottomNav.getMenu().setGroupCheckable(0, true, false);
+        for (int i = 0; i < bottomNav.getMenu().size(); i++) {
+            bottomNav.getMenu().getItem(i).setChecked(false);
+        }
 
         if (isFirstLoad) {
             fetchMyTrips();
@@ -81,7 +94,7 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
-      fetchMyTrips();
+        fetchMyTrips();
 
         SearchTrip = findViewById(R.id.SearchTrip);
         SearchTrip.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -194,8 +207,37 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
+
         dialog.show();
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(TripActivity.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(TripActivity.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(TripActivity.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(TripActivity.this, FavoriteActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(TripActivity.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
 
     private void showDatePicker(final EditText tripDateEditText) {
         final Calendar calendar = Calendar.getInstance();
@@ -216,24 +258,6 @@ public class TripActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    public void fetchTrips() {
-        db.collection("Trips")
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        // Handle errors
-                        return;
-                    }
-                    if (value != null) {
-                        tripList.clear();
-                        for (DocumentSnapshot document : value.getDocuments()) {
-                            TripClass tripClass = document.toObject(TripClass.class);
-                            tripList.add(tripClass);
-                        }
-                        filterTrips(SearchTrip.getQuery().toString()); // Apply filter after fetching data
-                    }
-                });
-    }
-
     public void fetchMyTrips() {
         db.collection("Trips")
                 .whereEqualTo("tripAdminid", currentuserId)
@@ -247,7 +271,8 @@ public class TripActivity extends AppCompatActivity {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            tripList.add(tripClass);
+                            if (tripClass != null && !isOldTrip(tripClass))
+                                tripList.add(tripClass);
                         }
                         filterTrips(SearchTrip.getQuery().toString()); // Apply filter after fetching data
                     }
@@ -267,7 +292,8 @@ public class TripActivity extends AppCompatActivity {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            tripList.add(tripClass);
+                            if (tripClass != null && !isOldTrip(tripClass))
+                                tripList.add(tripClass);
                         }
                         filterTrips(SearchTrip.getQuery().toString());
                         adapter.notifyDataSetChanged();
@@ -277,27 +303,33 @@ public class TripActivity extends AppCompatActivity {
 
     public void fetchAllTrips() {
         db.collection("Trips")
-                .whereNotIn("Usersid", Arrays.asList(currentuserId))
                 .orderBy("tripDate")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
-                        Log.e(TAG, "fetchAllTrips: Error fetching joined trips", error);
+                        Log.e(TAG, "fetchAllTrips: Error fetching trips", error);
                         return;
                     }
                     if (value != null) {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            tripList.add(tripClass);
+                            if (tripClass != null && !isOldTrip(tripClass)) {
+                                List<String> usersid = tripClass.getUsersid();
+                                if (usersid == null || !usersid.contains(currentuserId)) {
+                                    tripList.add(tripClass);
+                                }
+                            }
                         }
                         filterTrips(SearchTrip.getQuery().toString()); // Apply filter after fetching data
                     }
                 });
     }
 
+
     public void fetchTripsNotMine() {
         db.collection("Trips")
                 .whereNotEqualTo("tripAdminid", currentuserId)
+                .orderBy("tripAdminid")
                 .orderBy("tripDate")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
@@ -308,12 +340,54 @@ public class TripActivity extends AppCompatActivity {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            tripList.add(tripClass);
+                            if (tripClass != null && !isOldTrip(tripClass))
+                                tripList.add(tripClass);
                         }
                         filterTrips(SearchTrip.getQuery().toString()); // Apply filter after fetching data
                     }
                 });
     }
+
+    public void fetchOldTrips() {
+        db.collection("Trips")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "fetchOldTrips: Error fetching trips", error);
+                        return;
+                    }
+                    if (value != null) {
+                        tripList.clear();
+                        for (DocumentSnapshot document : value.getDocuments()) {
+                            TripClass tripClass = document.toObject(TripClass.class);
+                            if (tripClass != null && isOldTrip(tripClass) && (tripClass.getTripAdminid().equals(currentuserId) || tripClass.getUsersid().contains(currentuserId))) {
+                                tripList.add(tripClass);
+                            }
+                        }
+                        filterTrips(SearchTrip.getQuery().toString());
+                        Log.d(TAG, "fetchRequestedTrips: Old trips fetched successfully. Count: " + tripList.size());
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+    }
+
+    private boolean isOldTrip(TripClass trip) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
+            Calendar tripEndDate = Calendar.getInstance();
+            tripEndDate.setTime(sdf.parse(trip.getTripDate()));
+
+            int numberOfDays = trip.getNumberofDays() == 0 ? 1 : trip.getNumberofDays();
+            tripEndDate.add(Calendar.DAY_OF_YEAR, numberOfDays);
+
+            Calendar currentDate = Calendar.getInstance();
+            return tripEndDate.before(currentDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 
     public void fetchRequestedTrips() {
         tripList.clear(); // Clear the list before fetching new data
@@ -330,7 +404,7 @@ public class TripActivity extends AppCompatActivity {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            if (tripClass != null) {
+                            if (tripClass != null && !isOldTrip(tripClass)) {
                                 List<Map<String, Object>> requests = (List<Map<String, Object>>) document.get("requests");
                                 if (requests != null) {
                                     for (Map<String, Object> request : requests) {
@@ -368,6 +442,10 @@ public class TripActivity extends AppCompatActivity {
             currentCategory = "AllTrips";
             fetchAllTrips();
             fetchTripsNotMine();
+            addTripButton.setVisibility(View.GONE);
+        }
+        else if (view.getId() == R.id.OldTrips) {
+            fetchOldTrips();
             addTripButton.setVisibility(View.GONE);
         }
     }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- icon_border -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="80dp"
+        android:height="60dp">
+        <shape>
+            <corners
+                android:radius="30dp"/>
+            <stroke
+                android:color="@color/dark_blue"
+                android:width="2dp"/>
+            <solid
+                android:color="@android:color/transparent"/>
+        </shape>
+    </item>
+</layer-list>
