@@ -12,15 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yalatour.Classes.Post;
 import com.example.yalatour.R;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> {
 
@@ -35,24 +35,22 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
     private void loadPosts() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Query query = db.collection("Posts").orderBy("time", Query.Direction.ASCENDING);
+        db.collection("Posts").orderBy("time", Query.Direction.ASCENDING)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        // Handle error
+                        return;
+                    }
 
-        query.addSnapshotListener((value, error) -> {
-            if (error != null) {
-                // Handle error
-                return;
-            }
-
-            if (value != null) {
-                postList.clear();
-                for (QueryDocumentSnapshot doc : value) {
-                    Post post = doc.toObject(Post.class);
-                    postList.add(post);
-                }
-                notifyDataSetChanged();
-
-            }
-        });
+                    if (value != null) {
+                        postList.clear();
+                        for (QueryDocumentSnapshot doc : value) {
+                            Post post = doc.toObject(Post.class);
+                            postList.add(post);
+                        }
+                        notifyDataSetChanged();
+                    }
+                });
     }
 
     @NonNull
@@ -71,6 +69,8 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         holder.setDescription(post.getDescription());
         holder.setPlacename(post.getPlacename());
         holder.setPostimage(context, post.getPostimage());
+        holder.setProfileImage(context, post.getProfileImageUrl());
+
     }
 
     @Override
@@ -86,9 +86,9 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             mView = itemView;
         }
 
-        public void setUsername(String Username) {
-            TextView username = mView.findViewById(R.id.PostUsername);
-            username.setText(Username);
+        public void setUsername(String username) {
+            TextView postUsername = mView.findViewById(R.id.PostUsername);
+            postUsername.setText(username);
         }
 
         public void setTime(String time) {
@@ -114,6 +114,16 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         public void setPostimage(Context ctx, String postimage) {
             ImageView postImage = mView.findViewById(R.id.PostImage);
             Picasso.get().load(postimage).into(postImage);
+        }
+
+        public void setProfileImage(Context ctx, String profileImageUrl) {
+            CircleImageView profileImage = (CircleImageView) mView.findViewById(R.id.ProfileImage);
+
+            if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+                Picasso.get().load(profileImageUrl).into(profileImage);
+            } else {
+                profileImage.setImageResource(R.drawable.baseline_person_24);
+            }
         }
     }
 }

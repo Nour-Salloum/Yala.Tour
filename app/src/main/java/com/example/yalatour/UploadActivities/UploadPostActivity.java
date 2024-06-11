@@ -139,6 +139,7 @@ public class UploadPostActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful() && task.getResult().exists()) {
                     String username = task.getResult().getString("username");
+                    String profileImageUrl = task.getResult().getString("profileImageUrl");
 
                     HashMap<String, Object> postsMap = new HashMap<>();
                     postsMap.put("PostId", current_user_id);
@@ -148,6 +149,7 @@ public class UploadPostActivity extends AppCompatActivity {
                     postsMap.put("placename", PlaceName);
                     postsMap.put("postimage", downloadUrl);
                     postsMap.put("username", username);
+                    postsMap.put("profileImageUrl", profileImageUrl);
 
                     firestore.collection("Posts").document(current_user_id + postRandomName)
                             .set(postsMap)

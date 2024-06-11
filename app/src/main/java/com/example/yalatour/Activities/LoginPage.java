@@ -26,6 +26,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,18 @@ public class LoginPage extends AppCompatActivity {
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
 
+    /*@Override
+    protected void onStart() {
+        super.onStart();
+
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = fAuth.getCurrentUser();
+        if (currentUser != null) {
+            // User is signed in, navigate to homepage
+            startActivity(new Intent(LoginPage.this, HomePage.class));
+            finish(); // Optional, depending on your navigation flow
+        }
+    }*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

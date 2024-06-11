@@ -13,13 +13,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:background="@drawable/rauche_rock"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/PostsRecyclerView"
-        android:scrollbars="vertical"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="75dp"/>
+
     <!-- Buttons Layout -->
     <LinearLayout
         android:id="@+id/buttonsLayout"
@@ -83,7 +77,7 @@
 
         <!-- Profile Button -->
         <ImageButton
-            android:id="@+id/ProfileButton"
+            android:id="@+id/profile_button"
             android:layout_width="82dp"
             android:layout_height="60dp"
             android:layout_marginLeft="0.5dp"
@@ -108,4 +102,3 @@
         android:src="@drawable/baseline_add_24"
         android:tint="@color/white" />
 </RelativeLayout>
-

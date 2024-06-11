@@ -24,7 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class HomePage extends AppCompatActivity {
 
-    ImageButton Cities,Trips, Favorites;
+    ImageButton Cities,Trips, Favorites, Profile;
 
     private RecyclerView postList;
     private PostsAdapter adapter;
@@ -38,6 +38,7 @@ public class HomePage extends AppCompatActivity {
         Cities = findViewById(R.id.CitiesButton);
         Trips=findViewById(R.id.TripsButton);
         Favorites = findViewById(R.id.FavoritesButton);
+        Profile = findViewById(R.id.ProfileButton);
 
         AddPost=findViewById(R.id.AddPost);
 

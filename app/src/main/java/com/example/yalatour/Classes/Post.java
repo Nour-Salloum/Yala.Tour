@@ -1,13 +1,13 @@
 package com.example.yalatour.Classes;
 
 public class Post {
-    public String postId, time, date, postimage, description, placename, username;
+    public String postId, time, date, postimage, description, placename, username, profileImageUrl;
 
     public Post() {
         // Default constructor required for Firestore
     }
 
-    public Post(String postId, String time, String date, String postimage, String description, String placename, String username) {
+    public Post(String postId, String time, String date, String postimage, String description, String placename, String username, String profileImageUrl) {
         this.postId = postId;
         this.time = time;
         this.date = date;
@@ -15,6 +15,7 @@ public class Post {
         this.description = description;
         this.placename = placename;
         this.username = username;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getPostId() {
@@ -71,5 +72,13 @@ public class Post {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

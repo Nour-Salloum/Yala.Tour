@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="visible"
-    >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:visibility="visible">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -11,11 +11,20 @@
         android:orientation="vertical"
         android:background="@drawable/rauche_rock">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/ProfileImage"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/baseline_person_24"
+                app:civ_border_width="2dp"
+                app:civ_border_color="@color/dark_blue"/>
+
+
         <EditText
             android:id="@+id/user_name"
             android:layout_width="330dp"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/back_border"
             android:drawableLeft="@drawable/baseline_person_24"
             android:hint="Enter Username"
