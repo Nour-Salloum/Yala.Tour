@@ -24,7 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class HomePage extends AppCompatActivity {
 
-    ImageButton Cities,Trips;
+    ImageButton Cities,Trips, Favorites;
 
     private RecyclerView postList;
     private PostsAdapter adapter;
@@ -37,6 +37,8 @@ public class HomePage extends AppCompatActivity {
 
         Cities = findViewById(R.id.CitiesButton);
         Trips=findViewById(R.id.TripsButton);
+        Favorites = findViewById(R.id.FavoritesButton);
+
         AddPost=findViewById(R.id.AddPost);
 
 
@@ -55,6 +57,14 @@ public class HomePage extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        Favorites.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent =new Intent(HomePage.this, FavoritePage.class);
+                startActivity(intent);
+            }
+        });
+
         setupFab();
 
         postList = (RecyclerView) findViewById(R.id.PostsRecyclerView);

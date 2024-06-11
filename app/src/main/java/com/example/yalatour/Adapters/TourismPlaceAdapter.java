@@ -19,6 +19,8 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.yalatour.Activities.TourismPlaces;
+import com.example.yalatour.Classes.Favorite;
 import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.DetailsActivity.PlacesDetails;
 import com.example.yalatour.EditActivities.EditPlaceActivity;
@@ -31,12 +33,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapter.ViewHolder> {
     private Context context;
@@ -49,12 +54,11 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         this.placeList = placeList;
         this.selectedCity = selectedCity;
     }
+
     public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList) {
         this.context = context;
         this.placeList = placeList;
-
     }
-
 
     @NonNull
     @Override
@@ -67,20 +71,26 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TourismPlaceClass place = placeList.get(position);
 
-            holder.placeTitle.setText(place.getPlaceName());
-            Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
-            holder.placeCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, PlacesDetails.class);
-                    intent.putExtra("placeName", place.getPlaceName());
-                    intent.putExtra("placeDescription", place.getPlaceDescription());
-                    intent.putStringArrayListExtra("placeImages", new ArrayList<>(place.getPlaceImages()));
-                    intent.putExtra("TotalRating",place.getTotalRating());
-                    intent.putExtra("PlaceId", place.getPlaceId());
-                    context.startActivity(intent);
-                }
-            });
+
+        // Call checkIfPlaceIsFavorite synchronously before setting button click listeners
+        checkIfPlaceIsFavorite(place, holder);
+
+
+        holder.placeTitle.setText(place.getPlaceName());
+        Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
+
+        holder.placeCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, PlacesDetails.class);
+                intent.putExtra("placeName", place.getPlaceName());
+                intent.putExtra("placeDescription", place.getPlaceDescription());
+                intent.putStringArrayListExtra("placeImages", new ArrayList<>(place.getPlaceImages()));
+                intent.putExtra("TotalRating", place.getTotalRating());
+                intent.putExtra("PlaceId", place.getPlaceId());
+                context.startActivity(intent);
+            }
+        });
 
         holder.EditPlace.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +104,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 context.startActivity(intent);
             }
         });
+
         holder.Delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,6 +129,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 dialog.show();
             }
         });
+
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -131,12 +143,10 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                         if (documentSnapshot.exists()) {
                             Boolean isUser = documentSnapshot.getBoolean("user");
 
-
                             // Show or hide FAB based on admin status
-                            if (isUser != null && isUser==false){
+                            if (isUser != null && isUser == false) {
                                 holder.EditPlace.setVisibility(View.VISIBLE);
                                 holder.Delete.setVisibility(View.VISIBLE);
-
                             } else {
                                 holder.EditPlace.setVisibility(View.GONE);
                                 holder.Delete.setVisibility(View.GONE);
@@ -150,6 +160,23 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             // User is not signed in, handle accordingly
         }
 
+        // Handle the add to favorite button click
+
+        holder.addfavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addPlaceToFavorite(place, holder);
+            }
+        });
+
+        holder.removefavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removePlaceFromFavorite(place, holder);
+            }
+        });
+
+
     }
 
     @Override
@@ -161,7 +188,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         ImageView placeImage;
         TextView placeTitle;
         CardView placeCard;
-        ImageButton EditPlace, Delete;
+        ImageButton EditPlace, Delete, addfavorite, removefavorite;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -170,7 +197,121 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             placeCard = itemView.findViewById(R.id.placeCard);
             EditPlace = itemView.findViewById(R.id.EditPlace);
             Delete = itemView.findViewById(R.id.DeletePlace);
+            addfavorite = itemView.findViewById(R.id.AddFavorite);
+            removefavorite = itemView.findViewById(R.id.RemoveFavorite);
         }
+    }
+
+    private void addPlaceToFavorite(TourismPlaceClass place, ViewHolder holder) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(context, "Please log in to add to favorites", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String userId = currentUser.getUid();
+        DocumentReference favoriteRef = FirebaseFirestore.getInstance().collection("favorites").document(userId);
+
+        favoriteRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                // User's favorites exist, add the place
+                favoriteRef.update("favoritePlaces", FieldValue.arrayUnion(place))
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show();
+                            // Update button visibility
+                            holder.addfavorite.setVisibility(View.GONE);
+                            holder.removefavorite.setVisibility(View.VISIBLE);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(context, "Failed to add to favorites", Toast.LENGTH_SHORT).show());
+            } else {
+                // User's favorites do not exist, create new favorites document
+                List<TourismPlaceClass> favoritePlaces = new ArrayList<>();
+                favoritePlaces.add(place);
+                Favorite favorite = new Favorite(userId, favoritePlaces);
+                favoriteRef.set(favorite)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show();
+                            // Update button visibility
+                            holder.addfavorite.setVisibility(View.GONE);
+                            holder.removefavorite.setVisibility(View.VISIBLE);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(context, "Failed to add to favorites", Toast.LENGTH_SHORT).show());
+            }
+        }).addOnFailureListener(e -> Toast.makeText(context, "Failed to access favorites", Toast.LENGTH_SHORT).show());
+    }
+
+    private void removePlaceFromFavorite(TourismPlaceClass place, ViewHolder holder) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(context, "Please log in to remove from favorites", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String userId = currentUser.getUid();
+        DocumentReference favoriteRef = FirebaseFirestore.getInstance().collection("favorites").document(userId);
+
+        favoriteRef.update("favoritePlaces", FieldValue.arrayRemove(place))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                    // Update button visibility
+                    holder.addfavorite.setVisibility(View.VISIBLE);
+                    holder.removefavorite.setVisibility(View.GONE);
+
+                    // Check if the user has no favorite places left
+                    favoriteRef.get().addOnSuccessListener(documentSnapshot -> {
+                        List<String> favoritePlaces = documentSnapshot.contains("favoritePlaces") ?
+                                (List<String>) documentSnapshot.get("favoritePlaces") : new ArrayList<>();
+                        if (favoritePlaces.isEmpty()) {
+                            // If the user has no favorite places left, delete the user document
+                            favoriteRef.delete()
+                                    .addOnSuccessListener(aVoid1 -> {
+                                        // User document deleted successfully
+                                        Toast.makeText(context, "User removed from favorites", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Failed to remove user document
+                                        Toast.makeText(context, "Failed to remove user from favorites", Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> Toast.makeText(context, "Failed to remove from favorites", Toast.LENGTH_SHORT).show());
+    }
+
+    private void checkIfPlaceIsFavorite(TourismPlaceClass place, ViewHolder holder) {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            // User is not logged in, hide both buttons
+            holder.addfavorite.setVisibility(View.GONE);
+            holder.removefavorite.setVisibility(View.GONE);
+            return;
+        }
+        String userId = currentUser.getUid();
+        DocumentReference favoriteRef = FirebaseFirestore.getInstance().collection("favorites").document(userId);
+
+        favoriteRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                List<TourismPlaceClass> favoritePlaces = documentSnapshot.toObject(Favorite.class).getFavoritePlaces();
+                if (favoritePlaces.contains(place)) {
+                    // Place is in favorites, show remove button and hide add button
+                    holder.addfavorite.setVisibility(View.GONE);
+                    holder.removefavorite.setVisibility(View.VISIBLE);
+                } else {
+                    // Place is not in favorites, show add button and hide remove button
+                    holder.addfavorite.setVisibility(View.VISIBLE);
+                    holder.removefavorite.setVisibility(View.GONE);
+                }
+            } else {
+                // Favorites document does not exist, hide both buttons
+                holder.addfavorite.setVisibility(View.VISIBLE);
+                holder.removefavorite.setVisibility(View.GONE);
+            }
+        }).addOnFailureListener(e -> {
+            // Failed to check favorites, hide both buttons
+            holder.addfavorite.setVisibility(View.VISIBLE);
+            holder.removefavorite.setVisibility(View.GONE);
+        });
     }
 
     // Method to delete the place from Firestore and associated images from Firebase Storage
@@ -234,6 +375,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
     }
+
     private void deleteReviews(String placeId) {
         db = FirebaseFirestore.getInstance();
         db.collection("Reviews")
@@ -250,6 +392,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     }
                 });
     }
+
     private void deleteRatings(String placeId) {
         db = FirebaseFirestore.getInstance();
         db.collection("Ratings")
@@ -266,8 +409,4 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     }
                 });
     }
-
-
-
-
 }

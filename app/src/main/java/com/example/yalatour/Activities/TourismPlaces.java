@@ -10,22 +10,27 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.yalatour.Adapters.TourismPlaceAdapter;
 import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.DetailsActivity.DetailActivity;
+import com.example.yalatour.DetailsActivity.PlacesDetails;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadPlaceActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TourismPlaces extends AppCompatActivity {
 
@@ -36,8 +41,10 @@ public class TourismPlaces extends AppCompatActivity {
     private String cityName;
     private SearchView PlaceSearch;
     TourismPlaceAdapter adapter;
+
     private static final int UPLOAD_REQUEST_CODE = 123;
     private static final int EDIT_REQUEST_CODE = 1234;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +55,7 @@ public class TourismPlaces extends AppCompatActivity {
         recyclerView = findViewById(R.id.PlacerecyclerView);
         PlaceSearch=findViewById(R.id.PlacesearchView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+
 
         cityName = getIntent().getStringExtra("cityName");
         placeList = new ArrayList<>();
@@ -106,6 +114,8 @@ public class TourismPlaces extends AppCompatActivity {
                 return true;
             }
         });
+
+
     }
 
 

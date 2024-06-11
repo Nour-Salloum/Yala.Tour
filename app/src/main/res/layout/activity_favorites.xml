@@ -1,26 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="visible"
-    >
+    tools:context=".Activities.FavoritePage"
+    android:background="@drawable/rauche_rock">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:background="@drawable/rauche_rock"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/PostsRecyclerView"
+        android:id="@+id/FavoriteRecyclerView"
         android:scrollbars="vertical"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="75dp"/>
-    <!-- Buttons Layout -->
+
     <LinearLayout
         android:id="@+id/buttonsLayout"
         android:layout_width="match_parent"
@@ -28,10 +21,9 @@
         android:orientation="horizontal"
         android:layout_alignParentBottom="true">
 
-
         <!-- Home Button -->
         <ImageButton
-            android:id="@+id/HomeButton"
+            android:id="@+id/home_button2"
             android:layout_width="82dp"
             android:layout_height="60dp"
             android:background="@drawable/back_border"
@@ -42,7 +34,7 @@
             android:adjustViewBounds="true"
             android:layout_marginBottom="7dp" />
 
-        <!-- Trips Button -->
+        <!-- Search Button -->
         <ImageButton
             android:id="@+id/TripsButton"
             android:layout_width="82dp"
@@ -55,9 +47,9 @@
             android:src="@drawable/baseline_directions_car_24"
             android:layout_marginBottom="7dp"/>
 
-        <!-- Cities Button -->
+        <!-- Favorite Button -->
         <ImageButton
-            android:id="@+id/CitiesButton"
+            android:id="@+id/citiesButton"
             android:layout_width="82dp"
             android:layout_height="60dp"
             android:layout_marginLeft="0.5dp"
@@ -68,9 +60,9 @@
             android:src="@drawable/baseline_location_city_24"
             android:layout_marginBottom="7dp"/>
 
-        <!-- Favorites Button -->
+        <!-- Download Button -->
         <ImageButton
-            android:id="@+id/FavoritesButton"
+            android:id="@+id/favoritesButton"
             android:layout_width="82dp"
             android:layout_height="60dp"
             android:layout_marginLeft="0.5dp"
@@ -94,18 +86,5 @@
             android:src="@drawable/baseline_person_24"
             android:layout_marginBottom="7dp"/>
     </LinearLayout>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/AddPost"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="100dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginVertical="90dp"
-        android:backgroundTint="@color/dark_blue"
-        android:src="@drawable/baseline_add_24"
-        android:tint="@color/white" />
-</RelativeLayout>
 
+</RelativeLayout>

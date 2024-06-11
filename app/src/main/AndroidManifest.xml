@@ -43,8 +43,9 @@
             android:name=".UploadActivities.UploadPlaceActivity"
             android:exported="false" />
         <activity
-            android:name=".UploadActivities.UploadPostActivity"
+            android:name=".Activities.FavoritePage"
             android:exported="false" />
+
         <activity
             android:name=".Adapters.TourismPlaceAdapter"
             android:exported="false" />
