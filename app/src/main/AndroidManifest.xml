@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -22,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.YalaTour"
         tools:targetApi="31">
+        <activity
+            android:name=".EditActivities.EditMemoryActivity"
+            android:exported="false" />
         <activity
             android:name=".Activities.FullScreenMediaActivity"
             android:exported="false" />
@@ -37,9 +39,7 @@
         <activity
             android:name=".Activities.TripActivity"
             android:exported="false" />
-        <activity
-            android:name=".Activities.FullScreenImageActivity"
-            android:exported="false" />
+
         <activity
             android:name=".EditActivities.EditPlaceActivity"
             android:exported="false" />
@@ -56,6 +56,7 @@
         <activity
             android:name=".DetailsActivity.PlacesDetails"
             android:exported="false" />
+
         <activity
             android:name=".Activities.TourismPlaces"
             android:exported="false" />
@@ -86,7 +87,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
 
         <service
             android:name=".Classes.MessageService"

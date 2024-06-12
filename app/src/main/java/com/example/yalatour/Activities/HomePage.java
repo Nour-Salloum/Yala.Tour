@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.ImageButton;
@@ -19,12 +20,13 @@ import com.example.yalatour.R;
 
 import com.example.yalatour.UploadActivities.UploadPostActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 public class HomePage extends AppCompatActivity {
 
-    ImageButton Cities,Trips, Favorites;
+
 
     private RecyclerView postList;
     private PostsAdapter adapter;
@@ -35,35 +37,19 @@ public class HomePage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        Cities = findViewById(R.id.CitiesButton);
-        Trips=findViewById(R.id.TripsButton);
-        Favorites = findViewById(R.id.FavoritesButton);
 
         AddPost=findViewById(R.id.AddPost);
 
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        Cities.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                Intent intent =new Intent(HomePage.this, CityActivity.class);
-                startActivity(intent);
-            }
+        bottomNav.getMenu().setGroupCheckable(0, true, false);
+        for (int i = 0; i < bottomNav.getMenu().size(); i++) {
+            bottomNav.getMenu().getItem(i).setChecked(false);
+        }
 
-        });
-        Trips.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent =new Intent(HomePage.this, TripActivity.class);
-                startActivity(intent);
-            }
-        });
-        Favorites.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent =new Intent(HomePage.this, FavoritePage.class);
-                startActivity(intent);
-            }
-        });
+
+
 
         setupFab();
 
@@ -86,4 +72,33 @@ public class HomePage extends AppCompatActivity {
             startActivity(intent);
         });
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(HomePage.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(HomePage.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(HomePage.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(HomePage.this, FavoriteActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(HomePage.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
+
 }

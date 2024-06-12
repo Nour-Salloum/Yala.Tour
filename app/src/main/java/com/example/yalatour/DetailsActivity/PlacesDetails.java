@@ -293,7 +293,7 @@ public class PlacesDetails extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String username = documentSnapshot.getString("Username");
+                        String username = documentSnapshot.getString("username");
                         if (!reviewText.isEmpty()){
                             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
                             String dateString = dateFormat.format(new Date());

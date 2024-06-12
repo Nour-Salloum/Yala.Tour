@@ -3,16 +3,23 @@ package com.example.yalatour.DetailsActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.yalatour.Activities.CityActivity;
+import com.example.yalatour.Activities.FavoriteActivity;
+import com.example.yalatour.Activities.HomePage;
+import com.example.yalatour.Activities.ProfileActivity;
 import com.example.yalatour.Activities.SelectingPlacesActivity;
+import com.example.yalatour.Activities.TripActivity;
 import com.example.yalatour.Adapters.MembersAdapter;
 import com.example.yalatour.Adapters.MemoryImageAdapter;
 import com.example.yalatour.Adapters.MemoryTextAdapter;
@@ -29,6 +36,7 @@ import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.EditActivities.EditMemoryActivity;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadMemoryActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -168,6 +176,14 @@ public class TripDetails extends AppCompatActivity {
         Save = findViewById(R.id.Save);
         SaveMyRequirements = findViewById(R.id.SaveMyRequirements);
         Save.setVisibility(View.GONE);
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+
+        bottomNav.getMenu().setGroupCheckable(0, true, false);
+        for (int i = 0; i < bottomNav.getMenu().size(); i++) {
+            bottomNav.getMenu().getItem(i).setChecked(false);
+        }
 
         AddPlace.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -540,6 +556,7 @@ public class TripDetails extends AppCompatActivity {
         }
 
 
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -555,6 +572,36 @@ public class TripDetails extends AppCompatActivity {
             }
         }
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(TripDetails.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(TripDetails.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(TripDetails.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(TripDetails.this, FavoriteActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(TripDetails.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
+
+
 
 
     public void onCategoryClick(View view) {
