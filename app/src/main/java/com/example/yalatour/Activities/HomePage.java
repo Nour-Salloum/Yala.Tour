@@ -85,7 +85,7 @@ public class HomePage extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(HomePage.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(HomePage.this, FavoriteActivity.class);
+                        intent = new Intent(HomePage.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(HomePage.this, ProfileActivity.class);
                     }

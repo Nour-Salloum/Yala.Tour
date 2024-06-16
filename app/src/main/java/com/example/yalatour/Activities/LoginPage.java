@@ -39,7 +39,7 @@ public class LoginPage extends AppCompatActivity {
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
 
-    /*@Override
+    @Override
     protected void onStart() {
         super.onStart();
 
@@ -50,7 +50,7 @@ public class LoginPage extends AppCompatActivity {
             startActivity(new Intent(LoginPage.this, HomePage.class));
             finish(); // Optional, depending on your navigation flow
         }
-    }*/
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
