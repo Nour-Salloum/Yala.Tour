@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +32,8 @@ public class SelectingPlacesActivity extends AppCompatActivity {
     String tripId;
     SelectingPlacesAdapter adapter;
     List<TourismPlaceClass> selectedPlaces;
-    SearchView SelectingPlacesSearchView; // Changed to instance variable
+    SearchView SelectingPlacesSearchView;
+    ImageButton BackButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,8 @@ public class SelectingPlacesActivity extends AppCompatActivity {
 
         selectingPlacesRecyclerView = findViewById(R.id.SlectingPlacesrecyclerView);
         selectingPlacesRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        SelectingPlacesSearchView = findViewById(R.id.SelectingPlacesearchView); // Changed variable name to match XML
+        SelectingPlacesSearchView = findViewById(R.id.SelectingPlacesearchView);
+        BackButton=findViewById(R.id.BackButton);
         db = FirebaseFirestore.getInstance();
         tripId = getIntent().getStringExtra("TripId");
         allPlacesList = new ArrayList<>();
@@ -65,6 +68,12 @@ public class SelectingPlacesActivity extends AppCompatActivity {
                         .addOnFailureListener(e -> {
                             Log.e("Activity", "Failed to update selected places: " + e.getMessage());
                         });
+            }
+        });
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 

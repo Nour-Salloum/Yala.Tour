@@ -6,7 +6,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activities.SelectingPlacesActivity"
+    android:background="@drawable/rauche_rock"
     >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/dark_blue">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_arrow_back_24"
+            android:background="@null"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/BackButton"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Place to Trip"
+            android:textSize="23sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+
     <androidx.appcompat.widget.SearchView
         android:id="@+id/SelectingPlacesearchView"
         android:layout_width="350dp"
@@ -16,22 +42,29 @@
         app:iconifiedByDefault="false"
         app:queryHint="Search Places.."
         android:layout_marginLeft="15dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="60dp"
         />
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="35dp"
         android:text="Done"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="130dp"
         android:id="@+id/DoneAddingPlaces"
-
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/dark_blue"
+        android:background="@drawable/back_border"
         />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/SlectingPlacesrecyclerView"
         android:scrollbars="vertical"
-        android:layout_marginTop="90dp"/>
+        android:paddingTop="10dp"
+        android:layout_marginTop="160dp"/>
 
 
 </RelativeLayout>

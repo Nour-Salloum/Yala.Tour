@@ -33,7 +33,7 @@ import java.util.List;
 public class LoginPage extends AppCompatActivity {
     private EditText email, password;
     private Button Login;
-    private TextView gotoRegister, invalidCredentialsMessage;
+    private TextView gotoRegister, invalidCredentialsMessage, forgotPassword;
     private ToggleButton ShowPass;
     private int savedCursorPosition = 0;
     FirebaseAuth fAuth;
@@ -64,6 +64,7 @@ public class LoginPage extends AppCompatActivity {
         ShowPass = findViewById(R.id.toggleButton);
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
+        forgotPassword = findViewById(R.id.forgetPasswordRedirectText);
 
         Login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +165,15 @@ public class LoginPage extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginPage.this, ForgetPasswordPage.class);
+                startActivity(intent);
+            }
+        });
     }
+
 
     //a method to check if the field is empty
     public boolean checkField(EditText textField) {

@@ -25,6 +25,7 @@ import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.DetailsActivity.PlacesDetails;
 import com.example.yalatour.EditActivities.EditPlaceActivity;
 import com.example.yalatour.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -53,11 +54,13 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         this.context = context;
         this.placeList = placeList;
         this.selectedCity = selectedCity;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList) {
         this.context = context;
         this.placeList = placeList;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -75,8 +78,11 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         // Call checkIfPlaceIsFavorite synchronously before setting button click listeners
         checkIfPlaceIsFavorite(place, holder);
 
-
-        holder.placeTitle.setText(place.getPlaceName());
+        String placeTitle = place.getPlaceName();
+        if (placeTitle.length() > 20) { // Adjust the length as needed
+            placeTitle = placeTitle.substring(0, 15) + "...";
+        }
+        holder.placeTitle.setText(placeTitle);
         Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
 
         holder.placeCard.setOnClickListener(new View.OnClickListener() {
@@ -115,7 +121,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 // Delete the place
-                                deletePlace(place);
+                               deletePlaceFromFirestore(place,position);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -141,10 +147,10 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            Boolean isUser = documentSnapshot.getBoolean("user");
+                            Boolean isAdmin = documentSnapshot.getBoolean("admin");
 
                             // Show or hide FAB based on admin status
-                            if (isUser != null && isUser == false) {
+                            if (isAdmin != null && isAdmin == true) {
                                 holder.EditPlace.setVisibility(View.VISIBLE);
                                 holder.Delete.setVisibility(View.VISIBLE);
                             } else {
@@ -314,70 +320,50 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         });
     }
 
-    // Method to delete the place from Firestore and associated images from Firebase Storage
-    private void deletePlace(TourismPlaceClass place) {
-        // Get a reference to the Firestore document of the place
-        DocumentReference placeRef = FirebaseFirestore.getInstance().collection("TourismPlaces").document(place.getPlaceId());
+    public void deletePlaceFromFirestore(TourismPlaceClass place, int position) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String placeId = place.getPlaceId();
 
-        // Get a reference to the images stored in Firebase Storage
-        List<String> imageUrls = place.getPlaceImages();
-        List<StorageReference> storageReferences = new ArrayList<>();
-        for (String imageUrl : imageUrls) {
-            // Convert image URL to StorageReference
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
-            storageReferences.add(storageRef);
-        }
+        db.collection("TourismPlaces").document(placeId)
+                .delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        deleteReviews(placeId);
+                        deleteRatings(placeId);
+                        deletePlaceImages(place.getPlaceImages());
+                        // Remove the place from the list and notify the adapter
+                        placeList.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, placeList.size());
+                        Toast.makeText(context, "Place deleted successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("TourismPlaceAdapter", "Error deleting document", task.getException());
+                    }
+                });
+    }
+    public void deletePlaceFromFirestore(TourismPlaceClass place) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Create a list to hold deletion tasks
-        List<Task<Void>> deletionTasks = new ArrayList<>();
+        // Get the document ID of the place
+        String placeId = place.getPlaceId();
 
-        // Delete images from Firebase Storage
-        for (StorageReference storageRef : storageReferences) {
-            Task<Void> deletionTask = storageRef.delete();
-            deletionTasks.add(deletionTask);
-        }
-
-        // Wait for all deletion tasks to complete
-        Task<Void> allDeletionTasks = Tasks.whenAll(deletionTasks);
-
-        // Once all deletion tasks are completed, delete the document from Firestore
-        allDeletionTasks.addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                // All images deleted successfully, now delete the document from Firestore
-                placeRef.delete()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                // Remove the deleted place from the placeList
-                                placeList.remove(place);
-                                // Notify the adapter that the dataset has changed
-                                notifyDataSetChanged();
-                                deleteReviews(place.getPlaceId());
-                                deleteRatings(place.getPlaceId());
-                                // Show toast message for successful deletion
-                                Toast.makeText(context, "Place deleted successfully", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Show toast message for failure
-                                Toast.makeText(context, "Failed to delete place: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // Show toast message for failure
-                Toast.makeText(context, "Failed to delete image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Delete the document from Firestore
+        db.collection("TourismPlaces").document(placeId)
+                .delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        deleteReviews(placeId);
+                        deleteRatings(placeId);
+                        deletePlaceImages(place.getPlaceImages());
+                    } else {
+                        Log.e("TourismPlaceAdapter", "Error deleting document", task.getException());
+                    }
+                });
     }
 
+
+
     private void deleteReviews(String placeId) {
-        db = FirebaseFirestore.getInstance();
         db.collection("Reviews")
                 .whereEqualTo("review_placeid", placeId)
                 .get()
@@ -394,7 +380,6 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     }
 
     private void deleteRatings(String placeId) {
-        db = FirebaseFirestore.getInstance();
         db.collection("Ratings")
                 .whereEqualTo("rating_Placeid", placeId)
                 .get()
@@ -409,4 +394,26 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     }
                 });
     }
+
+    private void deletePlaceImages(List<String> imageUrls) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        for (String imageUrl : imageUrls) {
+            // Extract the filename from the URL
+            String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+
+            // Create a storage reference
+            StorageReference storageRef = storage.getReferenceFromUrl(imageUrl);
+
+            // Delete the file
+            storageRef.delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("TourismPlaceAdapter", "Image deleted successfully: " + filename);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("TourismPlaceAdapter", "Failed to delete image " + filename, e);
+                    });
+        }
+    }
+
 }

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
@@ -43,10 +45,10 @@ public class SignupPage extends AppCompatActivity {
     private EditText email, password, username;
     private CircleImageView ProfileImage;
     private Button Signup;
-    private TextView gotoLogin, passwordRequirement;
+    private TextView passwordRequirement, gotoLogin;
     private ToggleButton ShowPass;
     private String currentUserId;
-    private Uri profileImageUri; // New field for storing the image URI
+    private Uri profileImageUri;
     List<String> fcmTokenList;
     private int savedCursorPosition = 0;
     FirebaseAuth fAuth;
@@ -66,9 +68,9 @@ public class SignupPage extends AppCompatActivity {
         ProfileImage = findViewById(R.id.ProfileImage);
 
         Signup = findViewById(R.id.Signup);
-        gotoLogin = findViewById(R.id.loginRedirectText);
         passwordRequirement = findViewById(R.id.passwordRequirement);
         ShowPass = findViewById(R.id.toggleButton);
+        gotoLogin = findViewById(R.id.loginRedirectText);
 
         // Initialize Firebase components
         fAuth = FirebaseAuth.getInstance();
@@ -88,25 +90,36 @@ public class SignupPage extends AppCompatActivity {
                         passwordRequirement.setText("");
                     }
 
-                    fAuth.fetchSignInMethodsForEmail(email.getText().toString())
-                            .addOnSuccessListener(new OnSuccessListener<SignInMethodQueryResult>() {
+                    // Create account in Authentication
+                    fAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
+                            .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                                 @Override
-                                public void onSuccess(SignInMethodQueryResult signInMethodQueryResult) {
-                                    if (signInMethodQueryResult.getSignInMethods().size() > 0) {
-                                        Toast.makeText(SignupPage.this, "An account already exists with this email", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        createUserAccount();
-                                    }
+                                public void onSuccess(AuthResult authResult) {
+                                    FirebaseUser firebaseUser = fAuth.getCurrentUser();
+                                    currentUserId = firebaseUser.getUid();
+
+                                    // Send verification email
+                                    sendEmailVerification(firebaseUser);
                                 }
-                            }).addOnFailureListener(new OnFailureListener() {
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(SignupPage.this, "Failed to check email existence", Toast.LENGTH_SHORT).show();
+                                    if (e instanceof FirebaseAuthUserCollisionException) {
+
+                                    } else {
+                                        Toast.makeText(SignupPage.this, "Failed to Create Account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                             });
+                } else {
+                    // Show toast message to check email
+                    Toast.makeText(SignupPage.this, "Please Check Your Email", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+
 
         ProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,63 +150,121 @@ public class SignupPage extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(SignupPage.this, LoginPage.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
 
-    private void createUserAccount() {
-        fAuth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+    // Inside sendEmailVerification method
+    private void sendEmailVerification(FirebaseUser user) {
+        user.sendEmailVerification()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SignupPage.this, "Verification email sent to " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                            // Start listening for email verification completion
+                            startEmailVerificationListener(user);
+                        } else {
+                            Toast.makeText(SignupPage.this, "Failed to send verification email", Toast.LENGTH_SHORT).show();
+                            Log.e("SignupPage", "sendEmailVerification: failed with error: " + task.getException().getMessage());
+                        }
+                    }
+                });
+    }
+
+    // Listener for email verification completion
+    // Listener for email verification completion
+    private void startEmailVerificationListener(FirebaseUser user) {
+        new Thread(new Runnable() {
             @Override
-            public void onSuccess(AuthResult authResult) {
-                FirebaseUser firebaseUser = fAuth.getCurrentUser();
-                currentUserId = firebaseUser.getUid();
+            public void run() {
+                while (!user.isEmailVerified()) {
 
-                FirebaseMessaging.getInstance().getToken()
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful() && task.getResult() != null) {
-                                String fcmToken = task.getResult();
-                                fcmTokenList.add(fcmToken);
-
-                                if (profileImageUri != null) {
-                                    uploadProfileImage();
+                    // Refresh the user instance
+                    user.reload();
+                    // If user clicks Signup button again, show toast to check email
+                    Signup.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(SignupPage.this, "Please Check Your Email", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                // When email is verified, check if user exists in Firestore
+                fStore.collection("Users").document(user.getUid()).get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                if (documentSnapshot.exists()) {
+                                    // User exists, show error message
+                                    Toast.makeText(SignupPage.this, "An account already exists with this email", Toast.LENGTH_SHORT).show();
+                                    fAuth.signOut(); // Sign out the user
                                 } else {
-                                    saveUserToFirestore(null);
+                                    // User doesn't exist, proceed to create account in Firestore
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            CreateAccountinFirestore();
+                                        }
+                                    });
                                 }
-                            } else {
-                                Toast.makeText(SignupPage.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Error occurred while checking user existence
+                                Log.e("SignupPage", "Error checking user existence in Firestore: " + e.getMessage());
+                                Toast.makeText(SignupPage.this, "Failed to create account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof FirebaseAuthUserCollisionException) {
-                    Toast.makeText(SignupPage.this, "An account already exists with this email", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SignupPage.this, "Failed to Create Account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        }).start();
+    }
+
+
+    private void CreateAccountinFirestore() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        String fcmToken = task.getResult();
+                        fcmTokenList.add(fcmToken);
+
+                        if (profileImageUri != null) {
+                            uploadProfileImage();
+                        } else {
+                            saveUserToFirestore(null);
+                        }
+                    } else {
+                        Toast.makeText(SignupPage.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void uploadProfileImage() {
-        StorageReference filepath = UserProfileImageReference.child("profile_images").child(currentUserId + ".jpg");
-        filepath.putFile(profileImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                if (task.isSuccessful()) {
-                    filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            saveUserToFirestore(uri.toString());
-                        }
-                    });
-                } else {
-                    String message = task.getException().getMessage();
-                    Toast.makeText(SignupPage.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
+        if (profileImageUri != null) {
+            StorageReference filepath = UserProfileImageReference.child("profile_images").child(currentUserId + ".jpg");
+            filepath.putFile(profileImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                saveUserToFirestore(uri.toString());
+                            }
+                        });
+                    } else {
+                        String message = task.getException().getMessage();
+                        Toast.makeText(SignupPage.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // If no profile image is selected, save user without a profile image URL
+            saveUserToFirestore(null);
+        }
     }
 
     private void saveUserToFirestore(String profileImageUrl) {
@@ -230,7 +301,7 @@ public class SignupPage extends AppCompatActivity {
     public boolean checkField(EditText textField) {
         boolean valid = true;
         if (textField.getText().toString().isEmpty()) {
-            textField.setError("Could not be empty");
+            textField.setError("Cannot be empty");
             valid = false;
         }
         return valid;

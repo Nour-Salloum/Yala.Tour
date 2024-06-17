@@ -1,63 +1,125 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/TripCard"
-    android:layout_marginStart="12dp"
-    android:layout_marginEnd="12dp"
-    android:layout_marginHorizontal="10dp"
-    android:layout_marginVertical="10dp"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="8dp">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        >
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        <TextView
-            android:layout_width="120dp"
-            android:layout_height="30dp"
-            android:id="@+id/TripName"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:text="Name"
-            android:textColor="@color/lavender"
-            android:textSize="20sp"
-            />
-        <TextView
-            android:layout_width="120dp"
-            android:layout_height="30dp"
-            android:id="@+id/TripDate"
-            android:text="Date"
-            android:textColor="@color/lavender"
-            android:textSize="20sp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-           android:layout_toRightOf="@+id/TripName"/>
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/share"
-            android:layout_toRightOf="@+id/TripDate"
-            android:id="@+id/Share"
-            android:background="@null"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            />
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/delete"
-            android:background="@null"
-            android:id="@+id/DeleteTrip"
-            android:layout_marginTop="10dp"
-            android:layout_toRightOf="@+id/Share"/>
+    <androidx.cardview.widget.CardView
+        android:layout_width="270dp"
+        android:layout_height="300dp"
+        android:id="@+id/TripCard"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="50dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/TripImage"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/TripName"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="Name"
+                android:textSize="20sp" />
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true">
 
-    </RelativeLayout>
-</androidx.cardview.widget.CardView>
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/share"
+                    android:id="@+id/Share"
+                    android:background="@null"
+                    android:layout_margin="10dp" />
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/delete"
+                    android:id="@+id/DeleteTrip"
+                    android:background="@null"
+                    android:layout_margin="10dp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/DateText"
+        android:text="Start Date:"
+        android:textSize="20sp"
+        android:layout_below="@+id/TripCard"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="70dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/TripDate"
+        android:text="Date"
+        android:textSize="20sp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/TripCard"
+        android:layout_toRightOf="@+id/DateText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/EndDateText"
+        android:text="End Date:"
+        android:textSize="20sp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/DateText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/TripEndDate"
+        android:text="Date"
+        android:textSize="20sp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/TripDate"
+        android:layout_toRightOf="@+id/EndDateText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/TripAdminText"
+        android:text="Admin:"
+        android:textSize="20sp"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/EndDateText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/TripAdmin"
+        android:text="Name"
+        android:textSize="20sp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/TripEndDate"
+        android:layout_toRightOf="@+id/TripAdminText" />
+
+</RelativeLayout>

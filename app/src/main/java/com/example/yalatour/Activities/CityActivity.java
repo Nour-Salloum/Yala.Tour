@@ -1,5 +1,7 @@
 package com.example.yalatour.Activities;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -9,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -41,6 +44,7 @@ public class CityActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private MyAdapter cityAdapter;
     private TourismPlaceAdapter placeAdapter;
+    private static final int EDITCity_REQUEST_CODE = 12;
 
 
     @Override
@@ -77,7 +81,7 @@ public class CityActivity extends AppCompatActivity {
         }
 
         setupFab();
-        fetchCitiesAndPlaces();
+        //fetchCitiesAndPlaces();
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -120,17 +124,25 @@ public class CityActivity extends AppCompatActivity {
     }
 
     private void fetchCitiesAndPlaces() {
+        // Clear lists before fetching data
+        cityList.clear();
+        filteredCityList.clear();
+        placeList.clear();
+        filteredPlaceList.clear();
+
         db.collection("Cities")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        cityList.clear();
                         for (DocumentSnapshot document : task.getResult()) {
                             CityClass city = document.toObject(CityClass.class);
                             cityList.add(city);
                         }
+                        // Add all cities to filtered list
                         filteredCityList.addAll(cityList);
-                        cityAdapter.notifyDataSetChanged();
+                        cityAdapter.notifyDataSetChanged(); // Notify adapter of changes
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -138,16 +150,20 @@ public class CityActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        placeList.clear();
                         for (DocumentSnapshot document : task.getResult()) {
                             TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
                             placeList.add(place);
                         }
+                        // Add all places to filtered list
                         filteredPlaceList.addAll(placeList);
-                        placeAdapter.notifyDataSetChanged();
+                        placeAdapter.notifyDataSetChanged(); // Notify adapter of changes
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
     }
+
+
 
     private void filterData(String query) {
         filteredCityList.clear();
@@ -210,5 +226,23 @@ public class CityActivity extends AppCompatActivity {
                     return false;
                 }
             };
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+         if (requestCode == EDITCity_REQUEST_CODE&& resultCode == RESULT_OK) {
+            if (data != null && data.getBooleanExtra("CityEdited", false)) {
+               fetchCitiesAndPlaces();
+
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchCitiesAndPlaces(); // Refresh cities and places when activity is resumed
+    }
+
+
 
 }

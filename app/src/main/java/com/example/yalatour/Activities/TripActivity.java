@@ -189,6 +189,9 @@ public class TripActivity extends AppCompatActivity {
                                             } else if (currentCategory.equals("RequestedTrips")) {
                                                 fetchRequestedTrips();
                                             }
+                                            else if (currentCategory.equals("OldTrips")) {
+                                                fetchOldTrips();
+                                            }
                                             else{
                                                 fetchAllTrips();
                                                 fetchTripsNotMine();
@@ -210,34 +213,7 @@ public class TripActivity extends AppCompatActivity {
 
         dialog.show();
     }
-    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Intent intent = null;
 
-                    if (item.getItemId() == R.id.navigation_home) {
-                        intent = new Intent(TripActivity.this, HomePage.class);
-                    } else if (item.getItemId() == R.id.navigation_trips) {
-                        intent = new Intent(TripActivity.this, TripActivity.class);
-                    } else if (item.getItemId() == R.id.navigation_cities) {
-                        intent = new Intent(TripActivity.this, CityActivity.class);
-                    } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(TripActivity.this, FavoriteActivity.class);
-                    } else if (item.getItemId() == R.id.navigation_profile) {
-                        intent = new Intent(TripActivity.this, ProfileActivity.class);
-                    }
-
-                    if (intent != null) {
-                        intent.putExtra("menuItemId", item.getItemId());
-                        startActivity(intent);
-                        overridePendingTransition(0, 0); // No animation
-                        return true;
-                    }
-
-                    return false;
-                }
-            };
 
     private void showDatePicker(final EditText tripDateEditText) {
         final Calendar calendar = Calendar.getInstance();
@@ -445,9 +421,38 @@ public class TripActivity extends AppCompatActivity {
             addTripButton.setVisibility(View.GONE);
         }
         else if (view.getId() == R.id.OldTrips) {
+            currentCategory = "OldTrips";
             fetchOldTrips();
             addTripButton.setVisibility(View.GONE);
         }
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(TripActivity.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(TripActivity.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(TripActivity.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(TripActivity.this, FavoriteActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(TripActivity.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
 
 }

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    tools:context=".UploadActivities.UploadPlaceActivity">
+    android:orientation="vertical"
+    tools:context=".EditActivities.EditCityActivity">
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,64 +25,66 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add Tourism Place"
+                android:text="Edit City"
                 android:textSize="30sp"
                 android:textAlignment="center"
 />
-            <LinearLayout
-                android:id="@+id/imageContainer"
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:src="@drawable/upload"
+                android:id="@+id/EditImage"
+                android:layout_marginTop="10dp"
+                android:scaleType="fitXY"/>
+            <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/upload"
-                >
+                android:text="Change Image"
+                android:id="@+id/ChangeImage"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/dark_blue"
+                app:cornerRadius = "20dp"/>
 
-            </LinearLayout>
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:id="@+id/uploadPlace"
+                android:id="@+id/EditName"
                 android:background="@drawable/lavender_boarder"
                 android:layout_marginTop="20dp"
                 android:padding="16dp"
-                android:hint="Enter place name"
+                android:hint="Enter a city name"
                 android:gravity="start|center_vertical"
-
                 />
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
-                android:id="@+id/uploadPlaceDesc"
+                android:id="@+id/EditDesc"
                 android:background="@drawable/lavender_boarder"
                 android:layout_marginTop="20dp"
                 android:padding="16dp"
                 android:hint="Enter Description"
                 android:gravity="start|center_vertical"
+                />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:id="@+id/EditArea"
+                android:background="@drawable/lavender_boarder"
+                android:layout_marginTop="20dp"
+                android:padding="16dp"
+                android:hint="Enter Area"
+                android:gravity="start|center_vertical"
 
                 />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/categoryRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/lavender_boarder"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/uploadPlaceDesc" />
-
-
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:text="Save"
-                android:id="@+id/savePlaceButton"
+                android:id="@+id/SaveEdit"
                 android:layout_marginTop="20dp"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/dark_blue"/>
-
-
+                android:backgroundTint="@color/dark_blue"
+                app:cornerRadius = "20dp"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-</androidx.core.widget.NestedScrollView>
+</ScrollView>

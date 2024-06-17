@@ -51,7 +51,8 @@
                 android:layout_toRightOf="@+id/user_password"
                 android:text=""
                 android:textOff=""
-                android:textOn="" />
+                android:textOn=""
+                android:background="@drawable/hide"/>
         </RelativeLayout>
         <TextView
             android:layout_width="wrap_content"
@@ -72,6 +73,16 @@
             android:padding="5dp"
             android:id="@+id/signupRedirectText"
             android:text="Not yet registered? Sign Up"
+            android:textSize="12dp"
+            android:textColor="@color/black"
+
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:id="@+id/forgetPasswordRedirectText"
+            android:text="Forget Password?"
             android:textSize="12dp"
             android:textColor="@color/black"
 

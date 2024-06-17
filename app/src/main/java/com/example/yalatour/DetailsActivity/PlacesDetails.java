@@ -196,12 +196,12 @@ public class PlacesDetails extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            Boolean isUser = documentSnapshot.getBoolean("user");
+                            Boolean isAdmin = documentSnapshot.getBoolean("admin");
 
 
 
                             // Show or hide FAB based on admin status
-                            if (isUser != null && isUser==false) {
+                            if (isAdmin != null && isAdmin==true) {
                                 ReviewText.setVisibility(View.GONE);
                                 Send.setVisibility(View.GONE);
                                 PlaceRating.setVisibility(View.GONE);

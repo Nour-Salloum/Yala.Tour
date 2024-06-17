@@ -8,6 +8,7 @@
         android:layout_height="wrap_content"
         android:text="username"
         android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
         android:id="@+id/RequestUsername"/>
     <TextView
         android:layout_width="wrap_content"

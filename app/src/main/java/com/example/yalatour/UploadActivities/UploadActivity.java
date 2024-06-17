@@ -52,7 +52,7 @@ public class UploadActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveData();
+                saveAndUploadData();
             }
         });
     }
@@ -76,7 +76,7 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
-    private void saveData() {
+    private void saveAndUploadData() {
         if (imageUri == null) {
             Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show();
             return;
@@ -104,34 +104,41 @@ public class UploadActivity extends AppCompatActivity {
                 .addOnSuccessListener(taskSnapshot -> {
                     storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         imageURL = uri.toString();
-                        CityClass cityClass = new CityClass(city, desc, cat, imageURL);
-                        uploadCityData(city, cityClass);
-                        progressDialog.dismiss();
+                        CityClass cityClass = new CityClass(null,city, desc, cat, imageURL);
+
+                        // Upload city data to Firestore
+                        db.collection("Cities")
+                                .add(cityClass)
+                                .addOnSuccessListener(documentReference ->  {
+                                    String cityId = documentReference.getId();
+                                    cityClass.setCityId(cityId);
+                                    documentReference.set(cityClass)
+                                            .addOnSuccessListener(aVoid -> {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(UploadActivity.this, "Data uploaded successfully", Toast.LENGTH_SHORT).show();
+
+                                    // Refresh the city list in CityActivity
+                                    Intent intent = new Intent(UploadActivity.this, CityActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e -> {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(UploadActivity.this, "Failed to upload data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+
                     }).addOnFailureListener(e -> {
                         progressDialog.dismiss();
                         Toast.makeText(UploadActivity.this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
                     });
+
                 })
                 .addOnFailureListener(e -> {
                     progressDialog.dismiss();
                     Toast.makeText(UploadActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-    }
-
-    private void uploadCityData(String city, CityClass cityClass) {
-        db.collection("Cities").document(city)
-                .set(cityClass)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(UploadActivity.this, "Data uploaded successfully", Toast.LENGTH_SHORT).show();
-                    // Refresh the city list in CityActivity
-                    Intent intent = new Intent(UploadActivity.this, CityActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(UploadActivity.this, "Failed to upload data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-    }
 
+    }
 }

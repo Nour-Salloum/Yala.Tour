@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Home page -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/rauche_rock"
     android:visibility="visible">
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:background="@drawable/rauche_rock"/>
+       />
+
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/PostsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/PostsRecyclerView"
         android:scrollbars="vertical"
         android:layout_marginTop="50dp"
-        android:layout_marginBottom="75dp"/>
+        android:layout_marginBottom="75dp"
+        android:layout_above="@id/bottom_navigation"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -38,12 +42,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="100dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginVertical="90dp"
+        android:layout_marginBottom="90dp"
         android:backgroundTint="@color/dark_blue"
         android:src="@drawable/baseline_add_24"
-        android:tint="@color/white" />
+        android:tint="@color/white"/>
 </RelativeLayout>
-

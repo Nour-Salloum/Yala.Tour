@@ -47,7 +47,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -99,6 +98,7 @@ public class TripDetails extends AppCompatActivity {
     String TripId;
     Button Save;
     Button SaveMyRequirements;
+    boolean isOldTrip=true;
 
 
 
@@ -223,20 +223,14 @@ public class TripDetails extends AppCompatActivity {
                 startActivityForResult(intent, UPLOAD_Memory_REQUEST_CODE);
             }
         });
-        if(getMemoryId()!=null){
-            EditMemory.setVisibility(View.VISIBLE);
-            AddMemory.setVisibility(View.GONE);
-        }
-        else{
-            EditMemory.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.VISIBLE);
-        }
 
-        checkAdminAndInitialize();
         checkIfTripIsOld();
+        checkAdminAndInitialize();
         fetchSelectedPlaces();
         fetchRequirements();
         updateUI();
+
+
 
     }
     private String getMemoryId() {
@@ -500,31 +494,12 @@ public class TripDetails extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         TripClass trip = documentSnapshot.toObject(TripClass.class);
-                        if (trip != null) {
-                            String tripDateStr = trip.getTripDate();
-                            int numberOfDays = trip.getNumberofDays();
-                            if (numberOfDays == 0) {
-                                numberOfDays = 1;
-                            }
+                        if (trip != null && isOldTrip(trip)) {
 
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                            try {
-                                Date tripDate = sdf.parse(tripDateStr);
-                                if (tripDate != null) {
-                                    Calendar calendar = Calendar.getInstance();
-                                    calendar.setTime(tripDate);
-                                    calendar.add(Calendar.DAY_OF_YEAR, numberOfDays);
+                            isOldTrip = true;
 
-                                    Date endDate = calendar.getTime();
-                                    Date currentDate = new Date();
-
-                                    if (currentDate.after(endDate)) {
-                                        hideOldTripButtons();
-                                    }
-                                }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                        } else if (trip!=null) {
+                            isOldTrip = false;
                         }
                     }
                 })
@@ -532,12 +507,25 @@ public class TripDetails extends AppCompatActivity {
                     // Handle failure
                 });
     }
+    private boolean isOldTrip(TripClass trip) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
+            Calendar tripEndDate = Calendar.getInstance();
+            tripEndDate.setTime(sdf.parse(trip.getTripDate()));
 
-    private void hideOldTripButtons() {
-        Save.setVisibility(View.GONE);
-        SaveMyRequirements.setVisibility(View.GONE);
-        AddPlace.setVisibility(View.GONE);
+            int numberOfDays = trip.getNumberofDays() == 0 ? 1 : trip.getNumberofDays();
+            tripEndDate.add(Calendar.DAY_OF_YEAR, numberOfDays);
+
+            Calendar currentDate = Calendar.getInstance();
+            return tripEndDate.before(currentDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
+
+
+
 
 
     private void updateUI() {
@@ -553,6 +541,14 @@ public class TripDetails extends AppCompatActivity {
             RequetsRecyclerView.setVisibility(View.GONE);
             findViewById(R.id.Members).setVisibility(View.GONE);
             findViewById(R.id.Requests).setVisibility(View.GONE);
+        }
+        if(isOldTrip && isUserAdmin){
+            AddPlace.setVisibility(View.GONE);
+            findViewById(R.id.Requests).setVisibility(View.GONE);
+        }
+        else{
+            AddPlace.setVisibility(View.VISIBLE);
+            findViewById(R.id.Requests).setVisibility(View.VISIBLE);
         }
 
 
@@ -616,23 +612,17 @@ public class TripDetails extends AppCompatActivity {
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
-                AddMemory.setVisibility(View.GONE);
-            }
-            else{
-                EditMemory.setVisibility(View.GONE);
-                AddMemory.setVisibility(View.VISIBLE);
-            }
+            AddMemory.setVisibility(View.GONE);
+            EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
             memoriesVideoRecyclerView.setVisibility(View.GONE);
-            if (isUserAdmin) {
+            if (isUserAdmin && !isOldTrip) {
                 AddPlace.setVisibility(View.VISIBLE);
             } else {
                 AddPlace.setVisibility(View.GONE);
             }
-            checkIfTripIsOld();
+
         } else if (view.getId() == R.id.Requirements) {
             Log.d("TripDetails", "isUserAdmin on Requirements:"+isUserAdmin);
             RequirementsRecyclerView.setVisibility(View.VISIBLE);
@@ -645,19 +635,16 @@ public class TripDetails extends AppCompatActivity {
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
-                AddMemory.setVisibility(View.GONE);
-            }
-            else{
-                EditMemory.setVisibility(View.GONE);
-                AddMemory.setVisibility(View.VISIBLE);
-            }
+            AddMemory.setVisibility(View.GONE);
+            EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
             memoriesVideoRecyclerView.setVisibility(View.GONE);
+            if(isOldTrip){
+                Save.setVisibility(View.GONE);
+            }
             fetchRequirements();
-            checkIfTripIsOld();
+
         }
         else if (view.getId() == R.id.Members) {
             RequirementsRecyclerView.setVisibility(View.GONE);
@@ -669,19 +656,13 @@ public class TripDetails extends AppCompatActivity {
             MembersRecyclerView.setVisibility(View.VISIBLE);
             RequetsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
-                AddMemory.setVisibility(View.GONE);
-            }
-            else{
-                EditMemory.setVisibility(View.GONE);
-                AddMemory.setVisibility(View.VISIBLE);
-            }
+            AddMemory.setVisibility(View.GONE);
+            EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
             memoriesVideoRecyclerView.setVisibility(View.GONE);
             fetchMembers();
-            checkIfTripIsOld();
+
         } else if (view.getId() == R.id.Requests) {
             RequirementsRecyclerView.setVisibility(View.GONE);
             PlaceRecyclerView.setVisibility(View.GONE);
@@ -692,19 +673,13 @@ public class TripDetails extends AppCompatActivity {
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.VISIBLE);
             MembersRecyclerView.setVisibility(View.GONE);
-            if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
-                AddMemory.setVisibility(View.GONE);
-            }
-            else{
-                EditMemory.setVisibility(View.GONE);
-                AddMemory.setVisibility(View.VISIBLE);
-            }
+            AddMemory.setVisibility(View.GONE);
+            EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
             memoriesVideoRecyclerView.setVisibility(View.GONE);
             fetchRequests();
-            checkIfTripIsOld();
+
         }
         else if (view.getId() == R.id.MyRequirements) {
             // Show the RecyclerView for requirements
@@ -717,19 +692,16 @@ public class TripDetails extends AppCompatActivity {
             RequetsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
-                AddMemory.setVisibility(View.GONE);
-            }
-            else{
-                EditMemory.setVisibility(View.GONE);
-                AddMemory.setVisibility(View.VISIBLE);
-            }
+            AddMemory.setVisibility(View.GONE);
+            EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
             memoriesVideoRecyclerView.setVisibility(View.GONE);
+            if(isOldTrip){
+                SaveMyRequirements.setVisibility(View.GONE);
+            }
             fetchMyRequirements();
-            checkIfTripIsOld();
+
         }
         else if (view.getId() == R.id.Memories) {
             memoriesTextRecyclerView.setVisibility(View.VISIBLE);
@@ -753,7 +725,7 @@ public class TripDetails extends AppCompatActivity {
             RequetsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
             fetchMemories();
-            checkIfTripIsOld();
+
         }
 
 

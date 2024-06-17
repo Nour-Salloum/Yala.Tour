@@ -7,72 +7,83 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     tools:context=".UploadActivities.UploadMemoryActivity">
-
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_horizontal"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Trip Memory"
-            android:textSize="30sp"
-            android:textAlignment="center"
-            android:textColor="@color/lavender"/>
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="20dp">
 
         <LinearLayout
-            android:id="@+id/MemoryContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/upload">
-        </LinearLayout>
+            android:layout_gravity="center_horizontal"
+            android:padding="20dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/TextLayout"
-            android:layout_marginTop="20dp">
-
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:id="@+id/MemoryText"
-                android:layout_weight="1"
-                android:background="@drawable/lavender_boarder"
-                android:padding="16dp"
-                android:hint="Enter Text"
-                android:gravity="start|center_vertical"
-                android:textColor="@color/lavender" />
-
-            <ImageButton
-                android:id="@+id/AddText"
-                android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:padding="10dp"
-                android:src="@drawable/add" />
-        </LinearLayout>
+                android:text="Trip Memory"
+                android:textSize="30sp"
+                android:textAlignment="center"
+                />
 
-        <LinearLayout
-            android:id="@+id/dynamicTextContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp">
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/MemoryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/upload">
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/saveMemoryButton"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="300dp"
-            android:text="Save"
-            app:cornerRadius="20dp" />
-    </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/TextLayout"
+                android:layout_marginTop="20dp">
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/MemoryText"
+                    android:layout_weight="1"
+                    android:background="@drawable/lavender_boarder"
+                    android:padding="16dp"
+                    android:hint="Enter Text"
+                    android:gravity="start|center_vertical"
+                    />
+
+                <ImageButton
+                    android:id="@+id/AddText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:padding="10dp"
+                    android:src="@drawable/add" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dynamicTextContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp">
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/saveMemoryButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="200dp"
+                android:text="Save"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/dark_blue"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.core.widget.NestedScrollView>

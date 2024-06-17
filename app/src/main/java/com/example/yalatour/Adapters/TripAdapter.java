@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -13,14 +14,21 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.yalatour.Activities.TripActivity;
 import com.example.yalatour.Classes.FCMNotificationSender;
 import com.example.yalatour.Classes.TripClass;
@@ -35,6 +43,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,8 +77,57 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
 
         holder.TripName.setText(Trip.getTripName());
         holder.TripDate.setText(Trip.getTripDate());
+        holder.TripEndDate.setText(Trip.getEndDate());
         List<String> usersId = Trip.getUsersid();
         List<TripRequestsClass> Requests=Trip.getRequests();
+        Calendar currentDate = Calendar.getInstance();
+        String tripAdminId = Trip.getTripAdminid();
+        // Load place image for the background
+        if (Trip.getTripPlaces() != null && !Trip.getTripPlaces().isEmpty()) {
+            // Here, we select the first image from the first place.
+            // You can modify this logic based on your requirements.
+            String imageUrl = Trip.getTripPlaces().get(0).getPlaceImages().get(0);
+
+            // Load the image using Glide or any other image loading library
+            Glide.with(context)
+                    .load(imageUrl)
+                    .centerCrop()
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            // Set the loaded image as the background of the CardView
+                          holder.TripImage.setImageDrawable(resource);
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                            // Placeholder cleanup if needed
+                        }
+                    });
+        }
+        else {
+            // Clear the ImageView if there is no image
+            holder.TripImage.setImageDrawable(null);
+
+        }
+        if (tripAdminId != null) {
+            db.collection("Users").document(tripAdminId)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String tripAdminName = documentSnapshot.getString("username");
+                            holder.TripAdmin.setText(tripAdminName);
+                        } else {
+                            holder.TripAdmin.setText("Unknown Admin");
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        holder.TripAdmin.setText("Unknown Admin");
+                        Log.e("TripAdapter", "Failed to retrieve admin username: " + e.getMessage());
+                    });
+        } else {
+            holder.TripAdmin.setText("Unknown Admin");
+        }
 
         if (currentUserId != null && !currentUserId.equals(Trip.getTripAdminid()) && (usersId == null || !usersId.contains(currentUserId))&& !isUserInRequests(Requests,currentUserId)){
             holder.TripCard.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +156,9 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
                 }
             });
 
+
         }
+
         holder.Delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,12 +207,16 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
 
 
         // Compare the current user's ID with the ID of the user who created the trip
-        if (currentUserId != null && Trip.getTripAdminid() != null && currentUserId.equals(Trip.getTripAdminid())) {
+        if (currentUserId != null && Trip.getTripAdminid() != null && currentUserId.equals(Trip.getTripAdminid()) ) {
             holder.Delete.setVisibility(View.VISIBLE);
             holder.Share.setVisibility(View.VISIBLE);
 
         }
         else{
+            holder.Delete.setVisibility(View.GONE);
+            holder.Share.setVisibility(View.GONE);
+        }
+        if(Trip.getEndDate2().before(currentDate.getTime())){
             holder.Delete.setVisibility(View.GONE);
             holder.Share.setVisibility(View.GONE);
         }
@@ -166,8 +230,10 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
     }
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView TripName,TripDate;
+        TextView TripName,TripDate,TripEndDate,TripAdmin;
         CardView TripCard;
+        ImageView TripImage;
+
         private ImageButton Share,Delete;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -177,8 +243,9 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
             TripCard=itemView.findViewById(R.id.TripCard);
             Share=itemView.findViewById(R.id.Share);
             Delete=itemView.findViewById(R.id.DeleteTrip);
-
-
+            TripEndDate=itemView.findViewById(R.id.TripEndDate);
+            TripAdmin=itemView.findViewById(R.id.TripAdmin);
+            TripImage=itemView.findViewById(R.id.TripImage);
 
 
         }

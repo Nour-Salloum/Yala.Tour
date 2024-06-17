@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,7 @@ public class EditMemoryActivity extends AppCompatActivity {
     EditText MemoryEditText;
     Button EditsaveMemoryButton;
     ImageButton EditAddText;
+    TextView MoreMemories;
     List<String> Edit_imageUrls;
     List<String> Edit_Videos;
     List<String> Edit_Texts;
@@ -54,6 +56,7 @@ public class EditMemoryActivity extends AppCompatActivity {
         MemoryEditContainer = findViewById(R.id.MemoryEditContainer);
         EditTextLayout = findViewById(R.id.EditTextLayout);
         EditdynamicTextContainer = findViewById(R.id.EditdynamicTextContainer);
+        MoreMemories = findViewById(R.id.MoreMemories);
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance(); // Initialize Firebase Storage
         Edit_memoryId = getIntent().getStringExtra("MemoryId");
@@ -93,6 +96,12 @@ public class EditMemoryActivity extends AppCompatActivity {
                 addNewMemoryText();
             }
         });
+        MoreMemories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openPicker();
+            }
+        });
 
     }
 
@@ -105,9 +114,22 @@ public class EditMemoryActivity extends AppCompatActivity {
                         Edit_Texts = (List<String>) documentSnapshot.get("memory_Texts");
                         Edit_imageUrls = (List<String>) documentSnapshot.get("memory_Images");
                         Edit_Videos = (List<String>) documentSnapshot.get("memory_Videos");
+
+                        // Check for null and initialize if necessary
+                        if (Edit_Texts == null) {
+                            Edit_Texts = new ArrayList<>();
+                        }
+                        if (Edit_imageUrls == null) {
+                            Edit_imageUrls = new ArrayList<>();
+                        }
+                        if (Edit_Videos == null) {
+                            Edit_Videos = new ArrayList<>();
+                        }
+
                         UpdatedImageUrls.addAll(Edit_imageUrls);
                         UpdatedVideoUrls.addAll(Edit_Videos);
                         UpdatedTexts.addAll(Edit_Texts);
+
                         displayTexts(UpdatedTexts);
                         Edit_displaySelectedMedia(UpdatedImageUrls, UpdatedVideoUrls);
                     } else {
@@ -118,6 +140,7 @@ public class EditMemoryActivity extends AppCompatActivity {
                     Toast.makeText(EditMemoryActivity.this, "Failed to fetch memory details", Toast.LENGTH_SHORT).show();
                 });
     }
+
 
     private void displayTexts(List<String> texts) {
         for (String text : texts) {
@@ -178,7 +201,7 @@ public class EditMemoryActivity extends AppCompatActivity {
     }
 
 
-    private void uploadImageAndVideoToStorage(Uri fileUri) {
+    private void uploadImageAndVideoToStorage(Uri fileUri, String type) {
         // Show progress dialog while uploading
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Uploading...");
@@ -187,9 +210,13 @@ public class EditMemoryActivity extends AppCompatActivity {
 
         // Get Firebase storage reference
         FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef;
         String fileType = getContentResolver().getType(fileUri);
-        String folder = fileType.startsWith("image/") ? "images/" : "videos/";
-        StorageReference storageRef = storage.getReference().child("TourismPlaces/" + folder + System.currentTimeMillis());
+        if (fileType != null && fileType.startsWith("image/")) {
+            storageRef = storage.getReference().child("Memories/Images/" + System.currentTimeMillis() + ".jpg");
+        } else {
+            storageRef = storage.getReference().child("Memories/Videos/" + System.currentTimeMillis() + ".mp4");
+        }
 
         // Upload file to storage
         storageRef.putFile(fileUri)
@@ -198,9 +225,9 @@ public class EditMemoryActivity extends AppCompatActivity {
                     // Get the download URL of the uploaded file
                     storageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         String fileUrl = uri.toString();
-                        if (folder.equals("images/")) {
+                        if (type.equals("image")) {
                             UpdatedImageUrls.add(fileUrl);
-                        } else if (folder.equals("videos/")) {
+                        } else if (type.equals("video")) {
                             UpdatedVideoUrls.add(fileUrl);
                         }
                         Edit_displaySelectedMedia(UpdatedImageUrls, UpdatedVideoUrls);
@@ -208,9 +235,11 @@ public class EditMemoryActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     progressDialog.dismiss();
-                    Toast.makeText(EditMemoryActivity.this, "Failed to upload file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditMemoryActivity.this, "Failed to upload " + type + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+
 
     // Method to handle media picker result
     @Override
@@ -230,10 +259,17 @@ public class EditMemoryActivity extends AppCompatActivity {
 
             // Upload only the new files
             for (Uri fileUri : newFileUris) {
-                uploadImageAndVideoToStorage(fileUri);
+                String fileType = getContentResolver().getType(fileUri);
+                if (fileType != null && (fileType.startsWith("image/") || fileType.startsWith("video/"))) {
+                    String type = fileType.startsWith("image/") ? "image" : "video";
+                    uploadImageAndVideoToStorage(fileUri, type);
+                } else {
+                    Toast.makeText(this, "Unsupported file type", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
+
     private void Edit_displaySelectedMedia(List<String> imageUrls, List<String> videoUrls) {
         LinearLayout mediaContainer = findViewById(R.id.MemoryEditContainer);
         if (mediaContainer != null) {
@@ -316,6 +352,7 @@ public class EditMemoryActivity extends AppCompatActivity {
                                     openPicker();
                                 }
                             });
+                            MoreMemories.setVisibility(View.GONE);
                         }
                     }
                 });

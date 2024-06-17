@@ -35,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,7 +74,7 @@ public class PlaceinTrip extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                      addPlaceToSelectedTrips();
-                     finish();
+
             }
         });
         CreateTripDialog.setOnClickListener(new View.OnClickListener() {
@@ -234,9 +235,9 @@ public class PlaceinTrip extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    public void  fetchMyTrips(){
+    public void fetchMyTrips() {
         db.collection("Trips")
-                .whereEqualTo("tripAdminid",currentuserId)
+                .whereEqualTo("tripAdminid", currentuserId)
                 .orderBy("tripDate")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
@@ -247,10 +248,18 @@ public class PlaceinTrip extends AppCompatActivity {
                         Trips.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            Trips.add(tripClass);
+
+                            // Calculate the end date of the trip
+                            Date endDate = tripClass.getEndDate2();
+
+                            // Check if the trip is still valid (end date is in the future)
+                            if (endDate != null && endDate.after(new Date())) {
+                                Trips.add(tripClass);
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     }
                 });
     }
+
 }

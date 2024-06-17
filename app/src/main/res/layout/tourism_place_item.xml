@@ -29,7 +29,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/placeTitle"
             android:text="Title"
-            android:textColor="@color/lavender"
             android:textSize="18sp"
             android:gravity="center"
             android:layout_below="@+id/placeImage"

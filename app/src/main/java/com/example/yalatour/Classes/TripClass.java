@@ -2,7 +2,13 @@ package com.example.yalatour.Classes;
 
 import com.bumptech.glide.request.Request;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class TripClass {
@@ -113,4 +119,43 @@ public class TripClass {
     public void setTripName(String tripName) {
         TripName = tripName;
     }
+
+    public String getEndDate() {
+        try {
+            // Parse the TripDate to Date using the correct format
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+            Date startDate = sdf.parse(TripDate);
+            // Use Calendar to add the number of days
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+            calendar.add(Calendar.DAY_OF_YEAR, NumberofDays);
+            // Get the end date
+            Date endDate = calendar.getTime();
+            // Format the end date without leading zeros
+            SimpleDateFormat outputFormat = new SimpleDateFormat("M-d-yyyy");
+            return outputFormat.format(endDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public Date getEndDate2() {
+        try {
+            // Parse the TripDate to Date using the correct format
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+            Date startDate = sdf.parse(TripDate);
+            // Use Calendar to add the number of days
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+            int numberOfDays = getNumberofDays() == 0 ? 1 : getNumberofDays();
+            calendar.add(Calendar.DAY_OF_YEAR, numberOfDays);
+            // Get the end date
+            return calendar.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }
