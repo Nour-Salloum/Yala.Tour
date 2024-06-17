@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -34,7 +35,6 @@ public class UploadPostActivity extends AppCompatActivity {
     private ProgressDialog loadingBar;
     private ImageView UploadPostImage;
     private EditText UploadPostDescription, UploadPlaceName;
-
     private Button SaveButton;
     private static final int Gallery_Pick = 1;
 
@@ -44,6 +44,8 @@ public class UploadPostActivity extends AppCompatActivity {
     private String saveCurrentDate, saveCurrentTime, postRandomName, downloadUrl, current_user_id;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
+    private boolean isEditMode = false;
+    private String postId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,22 @@ public class UploadPostActivity extends AppCompatActivity {
         UploadPlaceName = findViewById(R.id.UploadPlaceName);
         SaveButton = findViewById(R.id.SaveButton);
         loadingBar = new ProgressDialog(this);
+
+        // Check if in edit mode
+        Intent intent = getIntent();
+        if (intent.hasExtra("PostId")) {
+            isEditMode = true;
+            postId = intent.getStringExtra("PostId");
+            String description = intent.getStringExtra("Description");
+            String placeName = intent.getStringExtra("PlaceName");
+            String postImage = intent.getStringExtra("PostImage");
+
+            UploadPostDescription.setText(description);
+            UploadPlaceName.setText(placeName);
+            Picasso.get().load(postImage).into(UploadPostImage);
+
+            ImageUri = Uri.parse(postImage); // Assuming postImage is a URL
+        }
 
         UploadPostImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,8 +102,8 @@ public class UploadPostActivity extends AppCompatActivity {
         } else if (TextUtils.isEmpty(Description)) {
             Toast.makeText(this, "Please say something about your image...", Toast.LENGTH_SHORT).show();
         } else {
-            loadingBar.setTitle("Add New Post");
-            loadingBar.setMessage("Please wait, while we are updating your new post...");
+            loadingBar.setTitle(isEditMode ? "Updating Post" : "Add New Post");
+            loadingBar.setMessage("Please wait, while we are " + (isEditMode ? "updating" : "adding") + " your post...");
             loadingBar.show();
             loadingBar.setCanceledOnTouchOutside(true);
 
@@ -94,43 +112,49 @@ public class UploadPostActivity extends AppCompatActivity {
     }
 
     private void StoreImageToFirebaseStorage() {
-        Calendar calForDate = Calendar.getInstance();
-        SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM-yyyy");
-        saveCurrentDate = currentDate.format(calForDate.getTime());
+        if (isEditMode && ImageUri.toString().startsWith("http")) {
+            // If in edit mode and image URI is already a URL, skip uploading
+            downloadUrl = ImageUri.toString();
+            SavingPostInformationToDatabase();
+        } else {
+            Calendar calForDate = Calendar.getInstance();
+            SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM-yyyy");
+            saveCurrentDate = currentDate.format(calForDate.getTime());
 
-        Calendar calForTime = Calendar.getInstance();
-        SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm");
-        saveCurrentTime = currentTime.format(calForTime.getTime());
+            Calendar calForTime = Calendar.getInstance();
+            SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm");
+            saveCurrentTime = currentTime.format(calForTime.getTime());
 
-        postRandomName = saveCurrentDate + saveCurrentTime;
+            postRandomName = saveCurrentDate + saveCurrentTime;
 
-        StorageReference filepath = PostsImagesReference.child("Post Image").child(ImageUri.getLastPathSegment() + postRandomName + ".jpg");
+            StorageReference filepath = PostsImagesReference.child("Post Image").child(ImageUri.getLastPathSegment() + postRandomName + ".jpg");
 
-        filepath.putFile(ImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                if (task.isSuccessful()) {
-                    filepath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.isSuccessful()) {
-                                downloadUrl = task.getResult().toString();
-                                Toast.makeText(UploadPostActivity.this, "Image uploaded successfully to storage...", Toast.LENGTH_SHORT).show();
-                                SavingPostInformationToDatabase();
-                            } else {
-                                String message = task.getException().getMessage();
-                                Toast.makeText(UploadPostActivity.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
-                                loadingBar.dismiss();
+            filepath.putFile(ImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        filepath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    downloadUrl = task.getResult().toString();
+                                    Toast.makeText(UploadPostActivity.this, "Image uploaded successfully to storage...", Toast.LENGTH_SHORT).show();
+                                    SavingPostInformationToDatabase();
+                                } else {
+                                    String message = task.getException().getMessage();
+                                    Toast.makeText(UploadPostActivity.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
+                                    loadingBar.dismiss();
+                                }
                             }
-                        }
-                    });
-                } else {
-                    String message = task.getException().getMessage();
-                    Toast.makeText(UploadPostActivity.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
+                        });
+                    } else {
+                        String message = task.getException().getMessage();
+                        Toast.makeText(UploadPostActivity.this, "Error occurred: " + message, Toast.LENGTH_SHORT).show();
+                        loadingBar.dismiss();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void SavingPostInformationToDatabase() {
@@ -142,7 +166,8 @@ public class UploadPostActivity extends AppCompatActivity {
                     String profileImageUrl = task.getResult().getString("profileImageUrl");
 
                     HashMap<String, Object> postsMap = new HashMap<>();
-                    postsMap.put("PostId", current_user_id);
+                    postsMap.put("PostId", isEditMode ? postId : current_user_id + postRandomName); // Use existing PostId if in edit mode
+                    postsMap.put("userId", current_user_id); // Add the user ID
                     postsMap.put("date", saveCurrentDate);
                     postsMap.put("time", saveCurrentTime);
                     postsMap.put("description", Description);
@@ -151,16 +176,16 @@ public class UploadPostActivity extends AppCompatActivity {
                     postsMap.put("username", username);
                     postsMap.put("profileImageUrl", profileImageUrl);
 
-                    firestore.collection("Posts").document(current_user_id + postRandomName)
+                    firestore.collection("Posts").document(isEditMode ? postId : current_user_id + postRandomName)
                             .set(postsMap)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         SendUserToHomePage();
-                                        Toast.makeText(UploadPostActivity.this, "New post is updated successfully.", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(UploadPostActivity.this, isEditMode ? "Post updated successfully." : "New post is added successfully.", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(UploadPostActivity.this, "Error occurred while updating your post: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(UploadPostActivity.this, "Error occurred while " + (isEditMode ? "updating" : "adding") + " your post: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                     loadingBar.dismiss();
                                 }

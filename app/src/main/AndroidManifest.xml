@@ -71,6 +71,9 @@
             android:name=".Activities.CityActivity"
             android:exported="false" />
         <activity
+            android:name=".Activities.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".UploadActivities.UploadActivity"
             android:exported="false" />
         <activity
@@ -88,6 +91,7 @@
         <activity
             android:name=".Activities.MainActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

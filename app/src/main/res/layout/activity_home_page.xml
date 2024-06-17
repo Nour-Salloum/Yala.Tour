@@ -1,28 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Home page -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rauche_rock"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:visibility="visible">
 
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-       />
+        android:background="@drawable/rauche_rock"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@color/dark_blue"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/HomePage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:layout_marginLeft="20dp"
+                android:textAlignment="textStart"
+                android:text="Home"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                />
+
+        </RelativeLayout>
+
+
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/PostsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/PostsRecyclerView"
         android:scrollbars="vertical"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="75dp"
-        android:layout_above="@id/bottom_navigation"/>
+        android:layout_marginTop="60dp"
+        android:layout_marginBottom="82dp"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -42,9 +68,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginStart="100dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="90dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginVertical="90dp"
         android:backgroundTint="@color/dark_blue"
         android:src="@drawable/baseline_add_24"
-        android:tint="@color/white"/>
+        android:tint="@color/white" />
 </RelativeLayout>
+

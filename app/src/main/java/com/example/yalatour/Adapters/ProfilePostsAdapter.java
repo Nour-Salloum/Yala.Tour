@@ -1,18 +1,21 @@
 package com.example.yalatour.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.yalatour.Activities.HomePage;
 import com.example.yalatour.Classes.Post;
 import com.example.yalatour.R;
+import com.example.yalatour.UploadActivities.UploadPostActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -24,12 +27,11 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> {
-
+public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapter.ViewHolder> {
     private List<Post> postList;
     private Context context;
 
-    public PostsAdapter(Context context) {
+    public ProfilePostsAdapter(Context context) {
         this.context = context;
         this.postList = new ArrayList<>();
         loadPosts();
@@ -40,8 +42,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Posts")
-                .whereNotEqualTo("userId", currentUserId)
-                .orderBy("userId")
+                .whereEqualTo("userId", currentUserId)
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
@@ -54,6 +55,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                         postList.clear();
                         for (QueryDocumentSnapshot doc : value) {
                             Post post = doc.toObject(Post.class);
+                            post.setPostId(doc.getId()); // Set the postId from document ID
                             postList.add(post);
                         }
                         notifyDataSetChanged();
@@ -78,11 +80,8 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         holder.setPlacename(post.getPlacename());
         holder.setPostimage(context, post.getPostimage());
         holder.setProfileImage(context, post.getProfileImageUrl());
-
-        // Check if the current context is HomePage and hide the buttons accordingly
-        if (context instanceof HomePage) {
-            holder.hideEditAndDeleteButtons();
-        }
+        holder.bindDeleteButton(post, context, postList, this); // Bind the delete button
+        holder.bindEditButton(post, context); // Bind the edit button
     }
 
     @Override
@@ -92,14 +91,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         View mView;
-        ImageView editPost;
-        ImageView deletePost;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
-            editPost = mView.findViewById(R.id.EditPost);
-            deletePost = mView.findViewById(R.id.DeletePost);
         }
 
         public void setUsername(String username) {
@@ -133,7 +128,8 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         }
 
         public void setProfileImage(Context ctx, String profileImageUrl) {
-            CircleImageView profileImage = mView.findViewById(R.id.ProfileImage);
+            CircleImageView profileImage = (CircleImageView) mView.findViewById(R.id.ProfileImage);
+
             if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
                 Picasso.get().load(profileImageUrl).into(profileImage);
             } else {
@@ -141,10 +137,45 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             }
         }
 
-        public void hideEditAndDeleteButtons() {
-            editPost.setVisibility(View.GONE);
-            deletePost.setVisibility(View.GONE);
+        public void bindDeleteButton(Post post, Context context, List<Post> postList, ProfilePostsAdapter adapter) {
+            ImageView deletePost = mView.findViewById(R.id.DeletePost);
+            deletePost.setOnClickListener(v -> {
+                if (post.getPostId() == null) {
+                    Toast.makeText(context, "Post ID is null, cannot delete post", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                new AlertDialog.Builder(context)
+                        .setTitle("Delete Post")
+                        .setMessage("Are you sure you want to delete this post?")
+                        .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            db.collection("Posts").document(post.getPostId())
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        postList.remove(post);
+                                        adapter.notifyDataSetChanged();
+                                        Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(context, "Error deleting post", Toast.LENGTH_SHORT).show();
+                                    });
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .show();
+            });
+        }
+
+        public void bindEditButton(Post post, Context context) {
+            ImageView editPost = mView.findViewById(R.id.EditPost);
+            editPost.setOnClickListener(v -> {
+                Intent editIntent = new Intent(context, UploadPostActivity.class);
+                editIntent.putExtra("PostId", post.getPostId());
+                editIntent.putExtra("Description", post.getDescription());
+                editIntent.putExtra("PlaceName", post.getPlacename());
+                editIntent.putExtra("PostImage", post.getPostimage());
+                context.startActivity(editIntent);
+            });
         }
     }
-
 }
