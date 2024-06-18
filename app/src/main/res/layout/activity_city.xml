@@ -8,6 +8,23 @@
     tools:context=".Activities.MainActivity"
     android:background="@drawable/rauche_rock"
     >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/dark_blue">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cities"
+            android:textSize="23sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchView"
@@ -17,8 +34,8 @@
         android:background="@drawable/search_style"
         app:iconifiedByDefault="false"
         app:queryHint="Search Cities and Places.."
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp"
         />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -26,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="120dp"
         android:layout_marginBottom="75dp"
         android:paddingBottom="56dp"
         />

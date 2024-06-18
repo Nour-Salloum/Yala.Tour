@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -29,14 +30,16 @@ import java.util.List;
 
 public class EditMemoryActivity extends AppCompatActivity {
 
+    private static final String TAG = "EditMemoryActivity";
+
     EditText MemoryEditText;
     Button EditsaveMemoryButton;
     ImageButton EditAddText;
-    TextView MoreMemories;
     List<String> Edit_imageUrls;
     List<String> Edit_Videos;
     List<String> Edit_Texts;
     String Edit_memoryId;
+    TextView MoreMemories;
 
     FirebaseFirestore db;
     FirebaseStorage storage;
@@ -63,7 +66,7 @@ public class EditMemoryActivity extends AppCompatActivity {
         Edit_Texts = new ArrayList<>();
         Edit_imageUrls = new ArrayList<>();
         Edit_Videos = new ArrayList<>();
-        UpdatedImageUrls= new ArrayList<>();
+        UpdatedImageUrls = new ArrayList<>();
         UpdatedVideoUrls = new ArrayList<>();
         UpdatedTexts = new ArrayList<>();
         fetchMemoryDetails(Edit_memoryId);
@@ -71,8 +74,13 @@ public class EditMemoryActivity extends AppCompatActivity {
         EditsaveMemoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Update UpdatedTexts with current texts from EditText views
+                captureTexts();
+
+                Log.d(TAG, "Updated Texts before saving: " + UpdatedTexts);
+
                 db.collection("Memories").document(Edit_memoryId)
-                        .update("memory_Texts", getNonEmptyNewTexts(),
+                        .update("memory_Texts", UpdatedTexts,
                                 "memory_Images", UpdatedImageUrls,
                                 "memory_Videos", UpdatedVideoUrls)
                         .addOnSuccessListener(aVoid -> {
@@ -85,8 +93,6 @@ public class EditMemoryActivity extends AppCompatActivity {
                         .addOnFailureListener(e -> {
                             Toast.makeText(EditMemoryActivity.this, "Failed to update memory", Toast.LENGTH_SHORT).show();
                         });
-
-
             }
         });
 
@@ -102,7 +108,6 @@ public class EditMemoryActivity extends AppCompatActivity {
                 openPicker();
             }
         });
-
     }
 
     private void fetchMemoryDetails(String memoryId) {
@@ -129,7 +134,6 @@ public class EditMemoryActivity extends AppCompatActivity {
                         UpdatedImageUrls.addAll(Edit_imageUrls);
                         UpdatedVideoUrls.addAll(Edit_Videos);
                         UpdatedTexts.addAll(Edit_Texts);
-
                         displayTexts(UpdatedTexts);
                         Edit_displaySelectedMedia(UpdatedImageUrls, UpdatedVideoUrls);
                     } else {
@@ -140,7 +144,6 @@ public class EditMemoryActivity extends AppCompatActivity {
                     Toast.makeText(EditMemoryActivity.this, "Failed to fetch memory details", Toast.LENGTH_SHORT).show();
                 });
     }
-
 
     private void displayTexts(List<String> texts) {
         for (String text : texts) {
@@ -173,21 +176,36 @@ public class EditMemoryActivity extends AppCompatActivity {
         newMemoryText.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         newMemoryText.setBackground(ContextCompat.getDrawable(this, R.drawable.lavender_boarder));
         newMemoryText.setPadding(16, 16, 16, 16);
+
         EditdynamicTextContainer.addView(newMemoryText);
     }
 
-    private List<String> getNonEmptyNewTexts() {
-        List<String> newTexts = new ArrayList<>();
+    private void captureTexts() {
+        UpdatedTexts.clear();
+
+        // Add the main memory text first
+        String mainMemoryText = MemoryEditText.getText().toString().trim();
+        if (!mainMemoryText.isEmpty()) {
+            UpdatedTexts.add(mainMemoryText);
+            Log.d(TAG, "Captured main memory text: " + mainMemoryText);
+        } else {
+            Log.d(TAG, "Main memory text is empty and not added.");
+        }
+
+        // Add the texts from dynamic text fields
         for (int i = 0; i < EditdynamicTextContainer.getChildCount(); i++) {
             View view = EditdynamicTextContainer.getChildAt(i);
             if (view instanceof EditText) {
                 String text = ((EditText) view).getText().toString().trim();
                 if (!text.isEmpty()) {
-                    newTexts.add(text);
+                    UpdatedTexts.add(text);
+                    Log.d(TAG, "Captured text: " + text);
+                } else {
+                    Log.d(TAG, "Empty text not added.");
                 }
             }
         }
-        return newTexts;
+        Log.d(TAG, "Total texts captured: " + UpdatedTexts.size());
     }
 
 
@@ -199,7 +217,6 @@ public class EditMemoryActivity extends AppCompatActivity {
         mediaPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         startActivityForResult(mediaPicker, 1);
     }
-
 
     private void uploadImageAndVideoToStorage(Uri fileUri, String type) {
         // Show progress dialog while uploading
@@ -238,7 +255,6 @@ public class EditMemoryActivity extends AppCompatActivity {
                     Toast.makeText(EditMemoryActivity.this, "Failed to upload " + type + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-
 
 
     // Method to handle media picker result
@@ -346,7 +362,7 @@ public class EditMemoryActivity extends AppCompatActivity {
                         imageFrameLayout.removeView(deselectButton);
                         if (imageUrls.isEmpty() && videoUrls.isEmpty()) {
                             mediaContainer.setBackground(getResources().getDrawable(R.drawable.upload));
-                            MemoryEditContainer.setOnClickListener(new View.OnClickListener() {
+                            mediaContainer.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     openPicker();
@@ -418,12 +434,13 @@ public class EditMemoryActivity extends AppCompatActivity {
                         videoFrameLayout.removeView(deselectButton);
                         if (imageUrls.isEmpty() && videoUrls.isEmpty()) {
                             mediaContainer.setBackground(getResources().getDrawable(R.drawable.upload));
-                            MemoryEditContainer.setOnClickListener(new View.OnClickListener() {
+                            mediaContainer.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     openPicker();
                                 }
                             });
+                            MoreMemories.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -437,12 +454,23 @@ public class EditMemoryActivity extends AppCompatActivity {
             }
 
             if (imageUrls.isEmpty() && videoUrls.isEmpty()) {
+
+
                 mediaContainer.setBackground(getResources().getDrawable(R.drawable.upload));
+                mediaContainer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openPicker();
+                    }
+                });
+                MoreMemories.setVisibility(View.GONE);
             } else {
                 mediaContainer.setBackground(null);
+                MoreMemories.setVisibility(View.VISIBLE);
             }
         }
     }
+
 
     private void deleteFileFromStorage(String fileUrl) {
         // Create a reference to the file to delete

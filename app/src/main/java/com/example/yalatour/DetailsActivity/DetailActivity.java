@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.yalatour.Activities.CityActivity;
-import com.example.yalatour.Activities.FavoriteActivity;
+import com.example.yalatour.Activities.FavoritePage;
 import com.example.yalatour.Activities.HomePage;
 import com.example.yalatour.Activities.ProfileActivity;
 import com.example.yalatour.Activities.TourismPlaces;
@@ -29,6 +29,7 @@ public class DetailActivity extends AppCompatActivity {
     TextView detailDesc, detailTitle;
     ImageView detailImage;
     Button showTourismPlacesButton;
+    ImageButton BackButton;
     ImageButton showHotelsButton,showHospitalsButton,showRestaurantsButton;
 
     @Override
@@ -43,6 +44,7 @@ public class DetailActivity extends AppCompatActivity {
         showHospitalsButton=findViewById(R.id.showHospitalsButton);
         showRestaurantsButton=findViewById(R.id.showRestaurantsButton);
         showTourismPlacesButton=findViewById(R.id.showTourismPlacesButton);
+        BackButton=findViewById(R.id.BackButton);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
@@ -69,6 +71,13 @@ public class DetailActivity extends AppCompatActivity {
                     Toast.makeText(DetailActivity.this, "Please install Google Maps", Toast.LENGTH_SHORT).show();
                 }
 
+            }
+
+        });
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
         showHospitalsButton.setOnClickListener(new View.OnClickListener() {
@@ -147,7 +156,7 @@ public class DetailActivity extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(DetailActivity.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(DetailActivity.this, FavoriteActivity.class);
+                        intent = new Intent(DetailActivity.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(DetailActivity.this, ProfileActivity.class);
                     }

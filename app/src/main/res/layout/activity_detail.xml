@@ -9,8 +9,33 @@
     >
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/dark_blue">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_arrow_back_24"
+            android:background="@null"
+            android:layout_marginTop="7dp"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/BackButton"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cty Details"
+            android:textSize="23sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:layout_marginTop="60dp"
         tools:context=".DetailsActivity.DetailActivity"
         >
 
@@ -23,16 +48,17 @@
             android:layout_marginBottom="12dp"
             android:gravity="center"
             android:text="Title"
-            android:textSize="24sp" />
+            android:textStyle="bold"
+            android:textSize="30sp" />
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:id="@+id/detailImage"
             android:padding="8dp"
             android:layout_gravity="center"
             android:src="@drawable/upload"
-
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.RoundedCorners"
             android:scaleType="fitXY"/>
 
         <TextView

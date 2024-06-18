@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,7 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yalatour.Activities.CityActivity;
-import com.example.yalatour.Activities.FavoriteActivity;
+import com.example.yalatour.Activities.FavoritePage;
 import com.example.yalatour.Activities.HomePage;
 import com.example.yalatour.Activities.ProfileActivity;
 import com.example.yalatour.Activities.SelectingPlacesActivity;
@@ -91,6 +92,7 @@ public class TripDetails extends AppCompatActivity {
 
     private FloatingActionButton AddMemory;
     private FloatingActionButton EditMemory;
+    private ImageButton BackButton;
 
     private static final int UPLOAD_Memory_REQUEST_CODE = 12345;
     private static final int Edit_Memory_REQUEST_CODE = 123456;
@@ -125,6 +127,7 @@ public class TripDetails extends AppCompatActivity {
         AddPlace = findViewById(R.id.Addplace);
         AddMemory = findViewById(R.id.AddMemory);
         EditMemory = findViewById(R.id.EditMemory);
+        BackButton = findViewById(R.id.BackButton);
         RequirementsRecyclerView = findViewById(R.id.RequirementsRecyclerView);
         requirementsList = new ArrayList<>();
         MyrequirementsList = new ArrayList<>();
@@ -221,6 +224,12 @@ public class TripDetails extends AppCompatActivity {
                 Intent intent = new Intent(TripDetails.this, EditMemoryActivity.class);
                 intent.putExtra("MemoryId",getMemoryId());
                 startActivityForResult(intent, UPLOAD_Memory_REQUEST_CODE);
+            }
+        });
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -581,7 +590,7 @@ public class TripDetails extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(TripDetails.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(TripDetails.this, FavoriteActivity.class);
+                        intent = new Intent(TripDetails.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(TripDetails.this, ProfileActivity.class);
                     }

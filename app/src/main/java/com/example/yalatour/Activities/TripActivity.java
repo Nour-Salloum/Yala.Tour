@@ -109,6 +109,7 @@ public class TripActivity extends AppCompatActivity {
                 return true;
             }
         });
+
     }
 
     private void filterTrips(String query) {
@@ -439,7 +440,7 @@ public class TripActivity extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(TripActivity.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(TripActivity.this, FavoriteActivity.class);
+                        intent = new Intent(TripActivity.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(TripActivity.this, ProfileActivity.class);
                     }

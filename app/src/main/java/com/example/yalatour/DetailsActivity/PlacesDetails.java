@@ -54,7 +54,7 @@ public class PlacesDetails extends AppCompatActivity {
 
     RelativeLayout PlaceImageView;
     List<String> imageUrls;
-    ImageButton Add, Favorite, Location;
+    ImageButton Add, Favorite, Location,BackButton;
     ImageView backgroundImageView;
     int currentPosition = 0;
     LinearLayout indicatorLayout;
@@ -84,6 +84,7 @@ public class PlacesDetails extends AppCompatActivity {
         Add = findViewById(R.id.AddToTrip);
         Favorite = findViewById(R.id.AddToFavorite);
         Location = findViewById(R.id.Location);
+        BackButton=findViewById(R.id.BackButton);
         backgroundImageView = findViewById(R.id.backgroundImageView);
         PlaceRating=findViewById(R.id.placeRatingBar);
         AllReviews=findViewById(R.id.AllReviews);
@@ -227,6 +228,19 @@ public class PlacesDetails extends AppCompatActivity {
                 Intent intent=new Intent(PlacesDetails.this, PlaceinTrip.class);
                 intent.putExtra("PlaceId", PlaceId);
                 startActivity(intent);
+            }
+        });
+        Location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + Uri.encode(PlaceName.getText().toString())));
+                startActivity(intent);
+            }
+        });
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
 

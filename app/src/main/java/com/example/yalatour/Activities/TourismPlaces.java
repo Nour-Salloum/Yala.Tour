@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.yalatour.Adapters.TourismPlaceAdapter;
@@ -38,6 +39,8 @@ public class TourismPlaces extends AppCompatActivity {
     private List<TourismPlaceClass> filteredplaceList;
     private String cityName;
     private SearchView PlaceSearch;
+
+    private ImageButton BackButton;
     TourismPlaceAdapter adapter;
     private static final int UPLOAD_REQUEST_CODE = 123;
     private static final int EDIT_REQUEST_CODE = 1234;
@@ -50,6 +53,7 @@ public class TourismPlaces extends AppCompatActivity {
         addPlace = findViewById(R.id.Addplace);
         recyclerView = findViewById(R.id.PlacerecyclerView);
         PlaceSearch=findViewById(R.id.PlacesearchView);
+        BackButton=findViewById(R.id.BackButton);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         cityName = getIntent().getStringExtra("cityName");
@@ -100,6 +104,12 @@ public class TourismPlaces extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 filterPlaces(newText);
                 return true;
+            }
+        });
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }
@@ -188,7 +198,7 @@ public class TourismPlaces extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(TourismPlaces.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(TourismPlaces.this, FavoriteActivity.class);
+                        intent = new Intent(TourismPlaces.this,FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(TourismPlaces.this, ProfileActivity.class);
                     }

@@ -6,6 +6,23 @@
     android:layout_height="match_parent"
     android:background="@drawable/rauche_rock"
     tools:context=".Activities.TripActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+
+        android:background="@color/dark_blue">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trips"
+        android:textSize="23sp"
+        android:textStyle="bold"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/white"
+        />
+    </LinearLayout>
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/SearchTrip"
@@ -15,15 +32,15 @@
         android:background="@drawable/search_style"
         app:iconifiedByDefault="false"
         app:queryHint="Search Trips.."
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp"/>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
         android:id="@+id/CategoryScroll"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="40dp">
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -32,7 +32,7 @@
                 android:textAlignment="textStart"
                 android:text="Home"
                 android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textSize="23sp"
                 android:textStyle="bold"
                 />
 

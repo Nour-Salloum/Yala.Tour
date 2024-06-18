@@ -211,7 +211,7 @@ public class CityActivity extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(CityActivity.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(CityActivity.this, FavoriteActivity.class);
+                        intent = new Intent(CityActivity.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(CityActivity.this, ProfileActivity.class);
                     }

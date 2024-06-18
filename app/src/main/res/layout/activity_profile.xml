@@ -22,34 +22,34 @@
             app:civ_border_color="@color/white"/>
 
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <TextView
-                    android:id="@+id/ProfileUsername"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_marginLeft="15dp"
-                    android:textAlignment="textStart"
-                    android:text="Username"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/ProfileUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:layout_marginLeft="15dp"
+                android:textAlignment="textStart"
+                android:text="Username"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                />
 
 
 
-                <ImageButton
-                    android:id="@+id/Logout"
-                    android:layout_alignParentRight="true"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:background="@drawable/logout_boarder"
-                    android:scaleType="center"
-                    android:src="@drawable/baseline_logout_24"/>
+            <ImageButton
+                android:id="@+id/Logout"
+                android:layout_alignParentRight="true"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/logout_boarder"
+                android:scaleType="center"
+                android:src="@drawable/baseline_logout_24"/>
 
-            </RelativeLayout>
+        </RelativeLayout>
 
 
 
