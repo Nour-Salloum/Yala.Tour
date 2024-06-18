@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/img_1"
+    android:background="@drawable/background"
     tools:context=".DetailsActivity.PlacesDetails">
 
     <LinearLayout
@@ -47,34 +47,54 @@
                 android:id="@+id/backgroundImageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
-
-            <ImageButton
-                android:id="@+id/Location"
+                android:scaleType="centerCrop"
+                />
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
-                android:background="@null"
-                android:padding="10dp"
-               android:src="@drawable/baseline_location_on_24" />
+                android:layout_marginLeft="10dp"
+                >
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="5dp"
+                    android:id="@+id/Location"
+                    android:backgroundTint="@color/dark_blue"
+                    android:src="@drawable/baseline_location_on_24"
+                    android:background="@drawable/back_border"
 
-            <ImageButton
-                android:id="@+id/AddToTrip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/Location"
-                android:background="@null"
-                android:padding="10dp"
-                android:src="@drawable/baseline_card_travel_24" />
+                    ></ImageButton>
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:id="@+id/AddToTrip"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:backgroundTint="@color/dark_blue"
+                    android:src="@drawable/baseline_card_travel_24"
+                    android:background="@drawable/back_border"
+                    android:layout_below="@id/Location"
 
-            <ImageButton
-                android:id="@+id/AddToFavorite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/AddToTrip"
-                android:background="@null"
-                android:padding="10dp"
-                android:src="@drawable/baseline_favorite_border_24_place" />
+                    ></ImageButton>
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/AddToFavorite"
+                    android:layout_marginLeft="5dp"
+                    android:backgroundTint="@color/dark_blue"
+                    android:src="@drawable/baseline_favorite_border_22"
+                    android:background="@drawable/back_border"
+                    android:layout_below="@id/AddToTrip"
+
+                    ></ImageButton>
+
+            </RelativeLayout>
+
+
+
+
 
             <LinearLayout
                 android:id="@+id/indicatorLayout"
