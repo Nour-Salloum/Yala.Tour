@@ -19,14 +19,90 @@
         android:layout_marginLeft="15dp"
         android:layout_marginTop="10dp"
         />
+    <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:id="@+id/CategoryScroll">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="70dp">
+            <ImageButton
+                android:id="@+id/TouristAttraction"
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:background="@drawable/categoriesborder"
+                android:scaleType="fitCenter"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/baseline_castle_24"
+                android:adjustViewBounds="true"/>
+
+            <ImageButton
+                android:id="@+id/Museums"
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/categoriesborder"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_museum_24"
+                android:adjustViewBounds="true"/>
+            <ImageButton
+                android:id="@+id/Religious"
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/categoriesborder"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_mosque_24"
+                android:adjustViewBounds="true"/>
+            <ImageButton
+                android:id="@+id/Activities"
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/categoriesborder"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_hiking_24"
+                android:adjustViewBounds="true"/>
+            <ImageButton
+                android:id="@+id/Nature"
+                android:layout_width="75dp"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/categoriesborder"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_nature_24"
+                android:adjustViewBounds="true"/>
+
+
+
+
+
+
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/PlacerecyclerView"
         android:scrollbars="vertical"
-        android:layout_marginTop="70dp"
-        android:paddingBottom="130dp"/>
+        android:paddingBottom="130dp"
+        android:layout_below="@+id/CategoryScroll"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/Addplace"
