@@ -2,6 +2,7 @@ package com.example.yalatour.Classes;
 
 public class Post {
     public String postId, userId, time, date, postimage, description, placename, username, profileImageUrl;
+    public int likes;
 
     public Post() {
     }
@@ -16,6 +17,7 @@ public class Post {
         this.placename = placename;
         this.username = username;
         this.profileImageUrl = profileImageUrl;
+        this.likes = 0;
     }
 
     public String getPostId() {
@@ -88,5 +90,12 @@ public class Post {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 }

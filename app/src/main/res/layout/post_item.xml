@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"> <!-- Adjust the margin as needed -->
+    android:layout_marginBottom="8dp">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -129,33 +129,57 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/PlaceName"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:text="Place Name"
-                    android:textSize="20sp"
-                    android:textColor="@color/dark_blue"
-                    android:layout_marginLeft="10dp"/>
-
-                <ImageButton
-                    android:id="@+id/LikeButton"
+                <RelativeLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/backgroundImageView"
-                    android:background="@null"
-                    android:src="@drawable/baseline_favorite_border_24" />
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/PlaceName"
+                        android:layout_width="350dp"
+                        android:layout_height="wrap_content"
+                        android:text="Place Name"
+                        android:textSize="20sp"
+                        android:textColor="@color/dark_blue"
+                        android:layout_marginLeft="10dp"/>
+                    <TextView
+                        android:id="@+id/PostDescription"
+                        android:layout_width="330dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/PlaceName"
+                        android:text="Post Description..."
+                        android:textSize="13dp"
+                        android:layout_marginLeft="15dp"/>
 
 
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ImageButton
+                        android:id="@+id/LikeButton"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:background="@drawable/baseline_favorite_border_24"
+                        android:onClick="likePost"
+                        />
+                    <ImageButton
+                        android:id="@+id/DislikeButton"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:background="@drawable/baseline_favorite_24"
+                        android:onClick="dislikePost"
+                        android:visibility="gone"
+
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/Likes"
+                        android:text="0 likes"
+                        android:layout_marginTop="30dp"
+                        android:textColor="@color/dark_blue"/>
+
+                </RelativeLayout>
             </LinearLayout>
-            <TextView
-                android:id="@+id/PostDescription"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Post Description..."
-                android:textSize="13dp"
-                android:layout_marginLeft="15dp"/>
 
 
             <LinearLayout
@@ -165,7 +189,6 @@
                 android:orientation="vertical"
                 >
 
-                <!-- EditText and Button below RecyclerView -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
