@@ -20,12 +20,12 @@
             android:background="@null"
             android:layout_marginTop="7dp"
             android:layout_marginLeft="10dp"
-            android:id="@+id/BackButton"
+            android:id="@+id/PlaceBackButton"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Place Details"
+            android:text="Tourism Places"
             android:textSize="23sp"
             android:textStyle="bold"
             android:layout_marginLeft="15dp"
@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="105dp">
+            android:layout_marginTop="110dp">
             <Button
                 android:id="@+id/All"
                 android:layout_width="75dp"
@@ -124,8 +124,8 @@
         app:iconifiedByDefault="false"
         app:queryHint="Search Places.."
         android:layout_below="@+id/Title"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp"
         />
 
 
@@ -134,7 +134,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/PlacerecyclerView"
         android:scrollbars="vertical"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="160dp"
         android:paddingBottom="130dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

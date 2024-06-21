@@ -7,31 +7,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.yalatour.Classes.TripRequestsClass;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.yalatour.R;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
-public class MembersAdapter  extends RecyclerView.Adapter<MembersAdapter.ViewHolder> {
-    Context context;
-    List<String> Membersids;
-   FirebaseFirestore db = FirebaseFirestore.getInstance();
-    String tripId;
+import de.hdodenhof.circleimageview.CircleImageView;
 
-    public MembersAdapter(Context context, List<String> membersids, String tripId) {
+public class MembersAdapter extends RecyclerView.Adapter<MembersAdapter.ViewHolder> {
+    private Context context;
+    private List<String> membersIds;
+    private FirebaseFirestore db;
+    private String tripId;
+
+    public MembersAdapter(Context context, List<String> membersIds, String tripId) {
         this.context = context;
-        Membersids = membersids;
+        this.membersIds = membersIds;
         this.tripId = tripId;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -43,90 +47,78 @@ public class MembersAdapter  extends RecyclerView.Adapter<MembersAdapter.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull MembersAdapter.ViewHolder holder, int position) {
-        String memberId = Membersids.get(position);
+        String memberId = membersIds.get(position);
 
-        // Fetch username for memberId
+        // Fetch username and profile image URL for memberId
         db.collection("Users").document(memberId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        // Retrieve username from Firestore document
+                        // Retrieve username and profile image URL from Firestore document
                         String username = documentSnapshot.getString("username");
                         holder.Username.setText(username);
+                        String imageUrl = documentSnapshot.getString("profileImageUrl");
+
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            // Load the image into the CircleImageView using Glide
+                            Glide.with(context)
+                                    .load(imageUrl)
+
+                                    .into(holder.MembersProfileImage);
+                        } else {
+                            holder.MembersProfileImage.setImageResource(R.drawable.baseline_person_blue);
+                        }
                     } else {
                         // Handle the case where the user document doesn't exist
                         holder.Username.setText("Unknown User");
+                        holder.MembersProfileImage.setImageResource(R.drawable.baseline_person_blue);
                     }
                 })
                 .addOnFailureListener(e -> {
                     // Handle failure
                     holder.Username.setText("Unknown User");
+                    holder.MembersProfileImage.setImageResource(R.drawable.baseline_person_blue);
                 });
 
-        holder.Remove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setMessage("Are you sure you want to Remove this Member?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteMember(position);
-                                Toast.makeText(context, "Member is Removed ", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Do nothing, dismiss the dialog
-                                dialog.dismiss();
-                            }
-                        });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
+        holder.Remove.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Are you sure you want to remove this member?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        deleteMember(position);
+                        Toast.makeText(context, "Member is removed", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+            AlertDialog dialog = builder.create();
+            dialog.show();
         });
     }
 
-
-
     @Override
     public int getItemCount() {
-        return Membersids.size();
+        return membersIds.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         TextView Username;
-        Button Remove;
+        CircleImageView MembersProfileImage;
+        ImageButton Remove;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             Username = itemView.findViewById(R.id.MembersName);
-            Remove=itemView.findViewById(R.id.Remove);
+            MembersProfileImage = itemView.findViewById(R.id.MembersProfileImage);
+            Remove = itemView.findViewById(R.id.Remove);
         }
     }
-        private void deleteMember(int position) {
 
-        String deleteMember = Membersids.get(position);
-        Membersids.remove(position);
+    private void deleteMember(int position) {
+        String deleteMember = membersIds.get(position);
+        membersIds.remove(position);
         notifyItemRemoved(position);
 
         // Perform deletion in Firestore
         db.collection("Trips").document(tripId)
                 .update("usersid", FieldValue.arrayRemove(deleteMember))
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle failure
-                        Toast.makeText(context, "Failed to Remove Member", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                .addOnFailureListener(e -> Toast.makeText(context, "Failed to remove member", Toast.LENGTH_SHORT).show());
     }
 }

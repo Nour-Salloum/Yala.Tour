@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.example.yalatour.Adapters.MyAdapter;
 import com.example.yalatour.Adapters.TourismPlaceAdapter;
@@ -56,7 +58,6 @@ public class CityActivity extends AppCompatActivity {
         cityRecyclerView = findViewById(R.id.cityRecyclerView);
         placeRecyclerView = findViewById(R.id.placeRecyclerView);
         searchView = findViewById(R.id.searchView);
-
         db = FirebaseFirestore.getInstance();
         cityList = new ArrayList<>();
         filteredCityList = new ArrayList<>();
@@ -67,7 +68,7 @@ public class CityActivity extends AppCompatActivity {
         placeAdapter = new TourismPlaceAdapter(this, filteredPlaceList);
 
         cityRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
-        placeRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+        placeRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         cityRecyclerView.setAdapter(cityAdapter);
         placeRecyclerView.setAdapter(placeAdapter);
@@ -186,18 +187,26 @@ public class CityActivity extends AppCompatActivity {
                 }
             }
 
-            if (!filteredPlaceList.isEmpty()) {
-                placeRecyclerView.setVisibility(View.VISIBLE);
-                cityRecyclerView.setVisibility(View.GONE);
-            } else {
-                placeRecyclerView.setVisibility(View.GONE);
+            if (!filteredCityList.isEmpty() && !filteredPlaceList.isEmpty()) {
                 cityRecyclerView.setVisibility(View.VISIBLE);
+                placeRecyclerView.setVisibility(View.VISIBLE);
+
+            } else if (!filteredCityList.isEmpty()) {
+                cityRecyclerView.setVisibility(View.VISIBLE);
+                placeRecyclerView.setVisibility(View.GONE);
+            } else if (!filteredPlaceList.isEmpty()) {
+                cityRecyclerView.setVisibility(View.GONE);
+                placeRecyclerView.setVisibility(View.VISIBLE);
+            } else {
+                cityRecyclerView.setVisibility(View.GONE);
+                placeRecyclerView.setVisibility(View.GONE);
             }
         }
 
         cityAdapter.notifyDataSetChanged();
         placeAdapter.notifyDataSetChanged();
     }
+
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override

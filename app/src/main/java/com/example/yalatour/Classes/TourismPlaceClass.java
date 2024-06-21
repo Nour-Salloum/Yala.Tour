@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class TourismPlaceClass {
-    private String placeId; // New field
+    private String placeId;
     private String placeName;
     private String placeDescription;
     private List<String> placeCategories;
     private List<String> placeImages;
-    private String cityName;
+    private String cityId;
     private float totalRating;
 
 
@@ -17,15 +17,14 @@ public class TourismPlaceClass {
         // Required empty constructor for Firestore
     }
 
-    public TourismPlaceClass(String placeId, String placeName, String placeDescription, List<String> placeCategories, List<String> placeImages, String cityName, float totalRating) {
+    public TourismPlaceClass(String placeId, String placeName, String placeDescription, List<String> placeCategories, List<String> placeImages, String cityId, float totalRating) {
         this.placeId = placeId;
         this.placeName = placeName;
         this.placeDescription = placeDescription;
         this.placeCategories = placeCategories;
         this.placeImages = placeImages;
-        this.cityName = cityName;
+        this.cityId = cityId;
         this.totalRating = totalRating;
-
     }
 
     public String getPlaceId() {
@@ -68,12 +67,12 @@ public class TourismPlaceClass {
         this.placeImages = placeImages;
     }
 
-    public String getCityName() {
-        return cityName;
+    public String getCityId() {
+        return cityId;
     }
 
-    public void setCityName(String cityName) {
-        this.cityName = cityName;
+    public void setCityId(String cityId) {
+        this.cityId = cityId;
     }
 
     public float getTotalRating() {
@@ -82,18 +81,5 @@ public class TourismPlaceClass {
 
     public void setTotalRating(float totalRating) {
         this.totalRating = totalRating;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TourismPlaceClass that = (TourismPlaceClass) o;
-        return Float.compare(totalRating, that.totalRating) == 0 && Objects.equals(placeId, that.placeId) && Objects.equals(placeName, that.placeName) && Objects.equals(placeDescription, that.placeDescription) && Objects.equals(placeCategories, that.placeCategories) && Objects.equals(placeImages, that.placeImages) && Objects.equals(cityName, that.cityName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(placeId, placeName, placeDescription, placeCategories, placeImages, cityName, totalRating);
     }
 }

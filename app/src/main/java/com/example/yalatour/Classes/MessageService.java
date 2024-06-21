@@ -78,7 +78,7 @@ public class MessageService extends FirebaseMessagingService {
                                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message.getNotification() != null ? message.getNotification().getBody() : ""))
                                 .setAutoCancel(true)
                                 .setVibrate(pattern)
-                                .setSmallIcon(R.drawable.add)
+                                .setSmallIcon(R.drawable.logo)
                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                 .setContentIntent(pendingIntent);
 

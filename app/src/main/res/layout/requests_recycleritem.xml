@@ -8,26 +8,28 @@
         android:layout_height="wrap_content"
         android:text="username"
         android:layout_marginTop="30dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="15dp"
         android:id="@+id/RequestUsername"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text=" is asking to join the trip"/>
-    <Button
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="90dp"
         android:text="Accept"
+        android:background="@drawable/baseline_person_add_alt_1_24"
         android:id="@+id/Accept"/>
-    <Button
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="10dp"
         android:text="Deny"
+        android:background="@drawable/baseline_person_remove_24"
         android:id="@+id/Deny"/>
 
 </LinearLayout>

@@ -4,10 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.annotation.NonNull;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 
 import com.example.yalatour.Adapters.TourismPlaceAdapter;
 import com.example.yalatour.Classes.TourismPlaceClass;
+import com.example.yalatour.DetailsActivity.DetailActivity;
 import com.example.yalatour.R;
 import com.example.yalatour.UploadActivities.UploadPlaceActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,7 +26,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +36,11 @@ public class TourismPlaces extends AppCompatActivity {
     private RecyclerView recyclerView;
     private List<TourismPlaceClass> placeList;
     private List<TourismPlaceClass> filteredplaceList;
-    private String cityName;
+    private String cityId;
     private SearchView PlaceSearch;
 
-    private ImageButton BackButton;
-    private TourismPlaceAdapter adapter;
+    ImageButton PlaceBackButton;
+    TourismPlaceAdapter adapter;
     private static final int UPLOAD_REQUEST_CODE = 123;
     private static final int EDIT_REQUEST_CODE = 1234;
 
@@ -52,32 +51,18 @@ public class TourismPlaces extends AppCompatActivity {
 
         addPlace = findViewById(R.id.Addplace);
         recyclerView = findViewById(R.id.PlacerecyclerView);
-        PlaceSearch = findViewById(R.id.PlacesearchView);
-        BackButton = findViewById(R.id.BackButton);
+        PlaceSearch=findViewById(R.id.PlacesearchView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
-        cityName = getIntent().getStringExtra("cityName");
+        PlaceBackButton = findViewById(R.id.PlaceBackButton);
+        cityId = getIntent().getStringExtra("cityId");
+        Log.d("TourismPlaces", "cityId: " + cityId);
         placeList = new ArrayList<>();
         filteredplaceList = new ArrayList<>();
-        adapter = new TourismPlaceAdapter(TourismPlaces.this, filteredplaceList, cityName);
+        adapter = new TourismPlaceAdapter(TourismPlaces.this, filteredplaceList, cityId);
         recyclerView.setAdapter(adapter);
 
-        ImageButton touristAttractionButton = findViewById(R.id.TouristAttraction);
-        ImageButton museumsButton = findViewById(R.id.Museums);
-        ImageButton religiousButton = findViewById(R.id.Religious);
-        ImageButton activitiesButton = findViewById(R.id.Activities);
-        ImageButton natureButton = findViewById(R.id.Nature);
-        Button allButton = findViewById(R.id.All);
-
-        allButton.setOnClickListener(view -> fetchPlaces());
-        touristAttractionButton.setOnClickListener(view -> fetchPlacesByCategory("Tourist Attraction"));
-        museumsButton.setOnClickListener(view -> fetchPlacesByCategory("Museums"));
-        religiousButton.setOnClickListener(view -> fetchPlacesByCategory("Religious"));
-        activitiesButton.setOnClickListener(view -> fetchPlacesByCategory("Activities"));
-        natureButton.setOnClickListener(view -> fetchPlacesByCategory("Nature"));
-
+        // Fetch and display only places belonging to the selected city
         fetchPlaces();
-
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -99,13 +84,21 @@ public class TourismPlaces extends AppCompatActivity {
         } else {
             addPlace.setVisibility(View.GONE);
         }
-
-        addPlace.setOnClickListener(v -> {
-            Intent intent = new Intent(TourismPlaces.this, UploadPlaceActivity.class);
-            intent.putExtra("cityName", cityName);
-            startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+        PlaceBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
         });
 
+        addPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TourismPlaces.this, UploadPlaceActivity.class);
+                intent.putExtra("cityId", cityId);
+                startActivityForResult(intent, UPLOAD_REQUEST_CODE); // Start the activity for result
+            }
+        });
         PlaceSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -119,34 +112,13 @@ public class TourismPlaces extends AppCompatActivity {
             }
         });
 
-        BackButton.setOnClickListener(v -> finish());
+
     }
 
-    private void fetchPlacesByCategory(String category) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("TourismPlaces")
-                .whereArrayContains("placeCategories", category)
-                .whereEqualTo("cityName", cityName)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        placeList.clear();
-                        filteredplaceList.clear(); // Clear the filtered list before adding new items
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
-                            placeList.add(place);
-                            filteredplaceList.add(place);
-                        }
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        Toast.makeText(TourismPlaces.this, "Error getting places: " + task.getException(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
 
     private void fetchPlaces() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Query query = db.collection("TourismPlaces").whereEqualTo("cityName", cityName);
+        Query query = db.collection("TourismPlaces").whereEqualTo("cityId", cityId);
 
         query.get()
                 .addOnCompleteListener(task -> {
@@ -166,7 +138,6 @@ public class TourismPlaces extends AppCompatActivity {
                         Log.e("TourismPlaces", "Error fetching places", task.getException());
                     }
                 });
-
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
@@ -176,23 +147,29 @@ public class TourismPlaces extends AppCompatActivity {
         }
     }
 
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null && data.getBooleanExtra("newPlaceAdded", false)) {
+                // Refresh the place list
                 fetchPlaces();
             }
         } else if (requestCode == EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
+            Log.d("TourismPlaces", "onActivityResult() called with requestCode=" + requestCode + ", resultCode=" + resultCode);
             if (data != null && data.getBooleanExtra("placeEdited", false)) {
+                // Refresh the place list when a place is edited
                 fetchPlaces();
+
             }
         }
     }
-
     @Override
     protected void onResume() {
         super.onResume();
+        // Refresh the place list every time the activity resumes
         fetchPlaces();
     }
 
@@ -209,7 +186,6 @@ public class TourismPlaces extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
     }
-
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override

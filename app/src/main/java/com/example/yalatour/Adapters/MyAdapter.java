@@ -63,6 +63,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             intent.putExtra("Image", city.getCityImage());
             intent.putExtra("Description", city.getCityDesc());
             intent.putExtra("Title", city.getCityTitle());
+            intent.putExtra("cityId", city.getCityId());
             context.startActivity(intent);
         });
 
@@ -72,7 +73,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             intent.putExtra("Description", city.getCityDesc());
             intent.putExtra("Title", city.getCityTitle());
             intent.putExtra("Area", city.getCityArea());
-            intent.putExtra("Id", city.getCityId());
+            intent.putExtra("cityId", city.getCityId());
             context.startActivity(intent);
         });
 
@@ -150,9 +151,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 .addOnFailureListener(e -> Log.e("MyAdapter", "Error deleting city document: " + e.getMessage(), e));
     }
 
-    private void deleteCityPlaces(String cityName) {
-        getPlacesForCity(cityName, placesList -> {
-            TourismPlaceAdapter tourismPlaceAdapter = new TourismPlaceAdapter(context, placesList, cityName);
+    private void deleteCityPlaces(String cityId) {
+        getPlacesForCity(cityId, placesList -> {
+            TourismPlaceAdapter tourismPlaceAdapter = new TourismPlaceAdapter(context, placesList, cityId);
             for (TourismPlaceClass place : placesList) {
                 tourismPlaceAdapter.deletePlaceFromFirestore(place);
             }
@@ -166,9 +167,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 .addOnFailureListener(e -> Log.e("MyAdapter", "Error deleting image: " + e.getMessage(), e));
     }
 
-    private void getPlacesForCity(String cityName, FirestoreCallback callback) {
+    private void getPlacesForCity(String cityId, FirestoreCallback callback) {
         db.collection("TourismPlaces")
-                .whereEqualTo("cityName", cityName)
+                .whereEqualTo("cityId", cityId)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

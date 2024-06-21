@@ -46,7 +46,7 @@
         android:layout_marginLeft="-22dp"
         android:layout_marginTop="26dp"
         android:layout_toRightOf="@+id/recTitle"
-        android:background="@drawable/edit" />
+        android:background="@drawable/baseline_edit_24" />
 
     <ImageButton
         android:id="@+id/DeleteCity"
@@ -58,7 +58,7 @@
         android:layout_marginTop="-33dp"
         android:layout_toEndOf="@+id/recImage"
         android:layout_toRightOf="@+id/EditCity"
-        android:background="@drawable/delete" />
+        android:background="@drawable/baseline_delete_24" />
 
     <View
         android:layout_width="355dp"
