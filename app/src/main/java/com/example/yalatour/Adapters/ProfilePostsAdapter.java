@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,6 +86,8 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false);
         return new ViewHolder(view);
+
+
     }
 
     @Override
@@ -100,6 +103,7 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
         holder.bindEditButton(post, context); // Bind the edit button
 
         holder.setLikes(post.getNumLikes());
+
 
         // Set images in ViewPager2
         holder.setPostImages(context, post.getPostImages());
@@ -167,6 +171,8 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
         private ImageButton dislikeButton;
         private TextView likes;
         ViewPager2 PostImagePager;
+        // Add a LinearLayout or any other suitable layout to hold indicators
+        LinearLayout imageIndicatorContainer;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -181,6 +187,9 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
             likes = mView.findViewById(R.id.Likes);
 
             PostImagePager = itemView.findViewById(R.id.PostImagePager);
+
+            // Initialize imageIndicatorContainer
+            imageIndicatorContainer = mView.findViewById(R.id.imageIndicatorContainer);
         }
 
         public void setUsername(String username) {
@@ -220,6 +229,49 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
         public void setPostImages(Context context, List<String> postImages) {
             ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(context, postImages);
             PostImagePager.setAdapter(imagePagerAdapter);
+
+            // Add image indicators
+            setupImageIndicators(postImages.size());
+        }
+
+        private void setupImageIndicators(int numImages) {
+            imageIndicatorContainer.removeAllViews(); // Clear existing indicators
+
+            // Create indicators for each image
+            ImageView[] indicators = new ImageView[numImages];
+            for (int i = 0; i < numImages; i++) {
+                indicators[i] = new ImageView(itemView.getContext());
+                indicators[i].setImageResource(R.drawable.indicator_inactive); // Set inactive indicator initially
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(8, 0, 8, 0); // Adjust margins as needed
+                indicators[i].setLayoutParams(layoutParams);
+
+                imageIndicatorContainer.addView(indicators[i]);
+            }
+
+            // Highlight the first indicator initially
+            if (numImages > 0) {
+                indicators[0].setImageResource(R.drawable.indicator_active); // Set the first indicator active
+            }
+
+            // ViewPager2 page change listener to update indicators
+            PostImagePager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+
+                    // Update indicators based on current page
+                    for (int i = 0; i < numImages; i++) {
+                        // Calculate the "opposite" position
+                        int oppositePosition = (numImages - 1) - position;
+
+                        indicators[i].setImageResource(
+                                i == oppositePosition ? R.drawable.indicator_active : R.drawable.indicator_inactive);
+                    }
+                }
+            });
         }
 
         public void bindDeleteButton(Post post, Context context, List<Post> postList, ProfilePostsAdapter adapter) {
