@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yalatour.Activities.HomePage;
+import com.example.yalatour.Activities.ProfileActivity;
 import com.example.yalatour.Adapters.ImageAdapter;
 import com.example.yalatour.Classes.Post;
 import com.example.yalatour.R;
@@ -179,48 +180,54 @@ public class UploadPostActivity extends AppCompatActivity implements ImageAdapte
     }
 
     private void SavingPostInformationToDatabase(List<String> downloadUrls) {
-        firestore.collection("Users").document(current_user_id).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful() && task.getResult().exists()) {
-                    String username = task.getResult().getString("username");
-                    String profileImageUrl = task.getResult().getString("profileImageUrl");
+        // Generate new date and time for editing
+        Calendar calForDate = Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("dd-MMMM-yyyy");
+        saveCurrentDate = currentDate.format(calForDate.getTime());
 
-                    HashMap<String, Object> postsMap = new HashMap<>();
-                    postsMap.put("PostId", isEditMode ? postId : current_user_id + postRandomName); // Use existing PostId if in edit mode
-                    postsMap.put("userId", current_user_id); // Add the user ID
-                    postsMap.put("date", saveCurrentDate);
-                    postsMap.put("time", saveCurrentTime);
-                    postsMap.put("description", Description);
-                    postsMap.put("placename", PlaceName);
-                    postsMap.put("postImages", downloadUrls);
-                    postsMap.put("username", username);
-                    postsMap.put("profileImageUrl", profileImageUrl);
+        Calendar calForTime = Calendar.getInstance();
+        SimpleDateFormat currentTime = new SimpleDateFormat("HH:mm");
+        saveCurrentTime = currentTime.format(calForTime.getTime());
 
-                    firestore.collection("Posts").document(isEditMode ? postId : current_user_id + postRandomName)
-                            .set(postsMap)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        SendUserToHomePage();
-                                        Toast.makeText(UploadPostActivity.this, isEditMode ? "Post updated successfully." : "New post is added successfully.", Toast.LENGTH_SHORT).show();
+        firestore.collection("Users").document(current_user_id).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().exists()) {
+                        String username = task.getResult().getString("username");
+                        String profileImageUrl = task.getResult().getString("profileImageUrl");
+
+                        HashMap<String, Object> postsMap = new HashMap<>();
+                        postsMap.put("PostId", isEditMode ? postId : current_user_id + postRandomName);
+                        postsMap.put("userId", current_user_id);
+                        postsMap.put("description", Description);
+                        postsMap.put("placename", PlaceName);
+                        postsMap.put("postImages", downloadUrls);
+                        postsMap.put("username", username);
+                        postsMap.put("profileImageUrl", profileImageUrl);
+
+                        // Always update date and time fields for edit mode
+                        postsMap.put("date", saveCurrentDate);
+                        postsMap.put("time", saveCurrentTime);
+
+                        firestore.collection("Posts").document(isEditMode ? postId : current_user_id + postRandomName)
+                                .set(postsMap)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        SendUserToProfileActivity();
+                                        Toast.makeText(UploadPostActivity.this, isEditMode ? "Post updated successfully." : "New post added successfully.", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(UploadPostActivity.this, "Error occurred while " + (isEditMode ? "updating" : "adding") + " your post: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(UploadPostActivity.this, "Error occurred while " + (isEditMode ? "updating" : "adding") + " your post: " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                     loadingBar.dismiss();
-                                }
-                            });
-                } else {
-                    Toast.makeText(UploadPostActivity.this, "Error: User not found.", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
-                }
-            }
-        });
+                                });
+                    } else {
+                        Toast.makeText(UploadPostActivity.this, "Error: User not found.", Toast.LENGTH_SHORT).show();
+                        loadingBar.dismiss();
+                    }
+                });
     }
 
-    private void SendUserToHomePage() {
-        Intent homeIntent = new Intent(UploadPostActivity.this, HomePage.class);
+    private void SendUserToProfileActivity() {
+        Intent homeIntent = new Intent(UploadPostActivity.this, ProfileActivity.class);
         startActivity(homeIntent);
         finish();
     }
