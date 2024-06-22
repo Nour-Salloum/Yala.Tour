@@ -76,9 +76,9 @@ public class TourismPlaces extends AppCompatActivity {
         Button allButton = findViewById(R.id.All);
 
         allButton.setOnClickListener(view -> fetchPlaces());
-        touristAttractionButton.setOnClickListener(view -> fetchPlacesByCategory("Tourist Attraction"));
+        touristAttractionButton.setOnClickListener(view -> fetchPlacesByCategory("Tourist Attractions"));
         museumsButton.setOnClickListener(view -> fetchPlacesByCategory("Museums"));
-        religiousButton.setOnClickListener(view -> fetchPlacesByCategory("Religious"));
+        religiousButton.setOnClickListener(view -> fetchPlacesByCategory("Religious Sites"));
         activitiesButton.setOnClickListener(view -> fetchPlacesByCategory("Activities"));
         natureButton.setOnClickListener(view -> fetchPlacesByCategory("Nature"));
         
