@@ -55,6 +55,7 @@ public class TripDetails extends AppCompatActivity {
 
     private static final String TAG = "TripDetails";
 
+    // UI elements
     TextView AddPlace;
     RecyclerView RequirementsRecyclerView;
     RequirementsAdapter requirementsAdapter;
@@ -72,6 +73,7 @@ public class TripDetails extends AppCompatActivity {
     List<String> Membersids;
 
 
+    // Memory UI elements
     MemoryImageAdapter memoryImageAdapter;
     MemoryTextAdapter memoryTextAdapter;
     MemoryVideoAdapter memoryVideoAdapter;
@@ -86,17 +88,22 @@ public class TripDetails extends AppCompatActivity {
     String currentuserId;
     FirebaseUser currentUser;
 
+    // Firebase instances
     FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private boolean isUserAdmin;
 
+    //UI buttons
     private FloatingActionButton AddMemory;
     private FloatingActionButton EditMemory;
     private ImageButton BackButton;
 
+    // Request codes for activities
     private static final int UPLOAD_Memory_REQUEST_CODE = 12345;
     private static final int Edit_Memory_REQUEST_CODE = 123456;
+    private static final int Places_REQUEST_CODE = 123;
 
+    // Trip details
     String TripId;
     Button Save;
     Button SaveMyRequirements;
@@ -104,13 +111,14 @@ public class TripDetails extends AppCompatActivity {
 
 
 
-    private static final int Places_REQUEST_CODE = 123;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_details);
 
+        // Initialize Firebase instances
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -124,6 +132,7 @@ public class TripDetails extends AppCompatActivity {
             return;
         }
 
+        // Initialize UI elements
         AddPlace = findViewById(R.id.Addplace);
         AddMemory = findViewById(R.id.AddMemory);
         EditMemory = findViewById(R.id.EditMemory);
@@ -153,12 +162,12 @@ public class TripDetails extends AppCompatActivity {
         PlaceAdapter = new TourismPlaceAdapter(TripDetails.this, PlacesList);
         PlaceRecyclerView.setAdapter(PlaceAdapter);
 
-        // Initialize lists
+        // Initialize lists for Memories
         imageUrls = new ArrayList<>();
         videoUrls = new ArrayList<>();
         texts = new ArrayList<>();
         memoriesList = new ArrayList<>();
-        // Set adapters
+        // Set adapters for Memories
         memoriesImageRecyclerView = findViewById(R.id.MemoriesImageRecyclerView);
         memoriesTextRecyclerView = findViewById(R.id.MemoriesTextRecyclerView);
         memoriesVideoRecyclerView = findViewById(R.id.MemoriesVideoRecyclerView);
@@ -175,14 +184,16 @@ public class TripDetails extends AppCompatActivity {
         memoriesTextRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         memoriesTextRecyclerView.setAdapter(memoryTextAdapter);
 
-
+        // Initialize buttons
         Save = findViewById(R.id.Save);
         SaveMyRequirements = findViewById(R.id.SaveMyRequirements);
         Save.setVisibility(View.GONE);
 
+        // Initialize bottom navigation and set listener
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
+        // Deselect all bottom navigation items
         bottomNav.getMenu().setGroupCheckable(0, true, false);
         for (int i = 0; i < bottomNav.getMenu().size(); i++) {
             bottomNav.getMenu().getItem(i).setChecked(false);
@@ -232,7 +243,7 @@ public class TripDetails extends AppCompatActivity {
                 finish();
             }
         });
-
+        // Check if the trip is old and if the user is an admin
         checkIfTripIsOld();
         checkAdminAndInitialize();
         fetchSelectedPlaces();
@@ -242,6 +253,7 @@ public class TripDetails extends AppCompatActivity {
 
 
     }
+    // Get Memory ID based on current user and trip ID
     private String getMemoryId() {
         for (MemoriesClass memory : memoriesList) {
             if (memory.getMemory_UserId().equals(currentuserId) && memory.getMemory_TripId().equals(TripId)) {
@@ -252,6 +264,7 @@ public class TripDetails extends AppCompatActivity {
     }
 
 
+    // Check if the current user is the admin and initialize requirements
     private void checkAdminAndInitialize() {
         db.collection("Trips").document(TripId)
                 .get()
@@ -272,9 +285,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
-
-
-
+    // Initialize requirements RecyclerView
     private void initializeRequirementsRecyclerView() {
         requirementsAdapter = new RequirementsAdapter(this, requirementsList, isUserAdmin);
         RequirementsRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
@@ -286,7 +297,7 @@ public class TripDetails extends AppCompatActivity {
         fetchMyRequirements();
         fetchRequirements();
     }
-
+    // Fetch selected places from Firebase
     private void fetchSelectedPlaces() {
         db.collection("Trips").document(TripId)
                 .addSnapshotListener((documentSnapshot, e) -> {
@@ -303,7 +314,7 @@ public class TripDetails extends AppCompatActivity {
                     }
                 });
     }
-
+    // Fetch My Requirements from Firebase
     private void fetchMyRequirements() {
         db.collection("MyRequirements")
                 .whereEqualTo("tripid", TripId)
@@ -335,8 +346,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
-
-
+    // Fetch members from Firebase
     private void fetchMembers() {
         db.collection("Trips").document(TripId)
                 .get()
@@ -355,6 +365,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
+    // Fetch requests from Firebase
     private void fetchRequests() {
         db.collection("Trips").document(TripId)
                 .addSnapshotListener((documentSnapshot, e) -> {
@@ -373,6 +384,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -380,6 +392,7 @@ public class TripDetails extends AppCompatActivity {
         fetchMemories();
     }
 
+    // Fetch user's requirements from Firebase
     private void fetchRequirements() {
         db.collection("Trips").document(TripId)
                 .get()
@@ -400,6 +413,7 @@ public class TripDetails extends AppCompatActivity {
                     // Handle failure
                 });
     }
+    // Fetch memories from Firebase
     private void fetchMemories() {
         db.collection("Memories")
                 .whereEqualTo("memory_TripId", TripId)
@@ -448,7 +462,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
-
+    // Save requirements to Firebase
     private void saveRequirements() {
         db.collection("Trips").document(TripId)
                 .update("requirements", requirementsList)
@@ -462,7 +476,7 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
-
+    // Save My Requirements to Firebase
     private void saveMyRequirements() {
         MyRequirementsClass myRequirement = new MyRequirementsClass(null, TripId, currentuserId, MyrequirementsList);
 
@@ -498,6 +512,7 @@ public class TripDetails extends AppCompatActivity {
                     Toast.makeText(TripDetails.this, "Failed to fetch My Requirements", Toast.LENGTH_SHORT).show();
                 });
     }
+    // Check if the trip is old
     private void checkIfTripIsOld() {
         db.collection("Trips").document(TripId)
                 .get()
@@ -517,6 +532,8 @@ public class TripDetails extends AppCompatActivity {
                     // Handle failure
                 });
     }
+
+    // Check if the trip is old
     private boolean isOldTrip(TripClass trip) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
@@ -534,10 +551,7 @@ public class TripDetails extends AppCompatActivity {
         }
     }
 
-
-
-
-
+    // Update UI based on user type and trip status
     private void updateUI() {
         if (isUserAdmin) {
             // Show UI elements for admin
@@ -566,6 +580,8 @@ public class TripDetails extends AppCompatActivity {
 
 
     }
+
+    // Handle the result of an activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -581,7 +597,13 @@ public class TripDetails extends AppCompatActivity {
                 updateMemoryButtons();
             }
         }
+        if (requestCode == Places_REQUEST_CODE && resultCode == RESULT_OK) {
+            if (data!=null && data.getBooleanExtra("placesAdded",false)){
+                fetchSelectedPlaces();
+            }
+        }
     }
+    // Update the visibility of the buttons based on the presence of a memory
     private void updateMemoryButtons() {
         if (getMemoryId() != null) {
             EditMemory.setVisibility(View.VISIBLE);
@@ -591,6 +613,7 @@ public class TripDetails extends AppCompatActivity {
             AddMemory.setVisibility(View.VISIBLE);
         }
     }
+    // Listener for bottom navigation item selection
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override

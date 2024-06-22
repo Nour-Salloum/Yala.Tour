@@ -31,7 +31,7 @@ public class SelectingPlacesActivity extends AppCompatActivity {
     List<TourismPlaceClass> filteredPlaceList;
     FirebaseFirestore db;
     TextView done;
-    String tripId;
+    String TripId;
     SelectingPlacesAdapter adapter;
     List<TourismPlaceClass> selectedPlaces;
     SearchView SelectingPlacesSearchView;
@@ -48,19 +48,20 @@ public class SelectingPlacesActivity extends AppCompatActivity {
         SelectingPlacesSearchView = findViewById(R.id.SelectingPlacesearchView);
         BackButton = findViewById(R.id.BackButton);
         db = FirebaseFirestore.getInstance();
-        tripId = getIntent().getStringExtra("TripId");
+        TripId = getIntent().getStringExtra("TripId");
+        Log.d("Activity", "TripId: " + TripId);
         allPlacesList = new ArrayList<>();
         done = findViewById(R.id.DoneAddingPlaces);
         selectedPlaces = new ArrayList<>();
         filteredPlaceList = new ArrayList<>();
-        adapter = new SelectingPlacesAdapter(this, filteredPlaceList, selectedPlaces);
-        selectingPlacesRecyclerView.setAdapter(adapter);
+
+
         fetchSelectedPlaces();
 
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                db.collection("Trips").document(tripId)
+                db.collection("Trips").document(TripId)
                         .update("tripPlaces", adapter.getSelectedPlaces())
                         .addOnSuccessListener(aVoid -> {
                             Intent resultIntent = new Intent();
@@ -122,7 +123,7 @@ public class SelectingPlacesActivity extends AppCompatActivity {
                         for (DocumentSnapshot document : task.getResult()) {
                             TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
                             allPlacesList.add(place);
-                            Log.d("fetchAllPlaces", "Place Name: " + place.getPlaceName() + ", City ID: " + place.getCityId());
+
                         }
                         filterPlaces(SelectingPlacesSearchView.getQuery().toString());
                     } else {
@@ -133,43 +134,54 @@ public class SelectingPlacesActivity extends AppCompatActivity {
     }
 
     private void fetchSelectedPlaces() {
-        if (tripId != null) {
-            db.collection("Trips").document(tripId)
+        if (TripId != null) {
+            db.collection("Trips").document(TripId)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
-                            this.selectedPlaces = documentSnapshot.toObject(TripClass.class).getTripPlaces();
-                            if (this.selectedPlaces != null && !this.selectedPlaces.isEmpty()) {
-                                adapter = new SelectingPlacesAdapter(this, filteredPlaceList, selectedPlaces); // Pass filteredPlaceList
-                                selectingPlacesRecyclerView.setAdapter(adapter);
-                                adapter.notifyDataSetChanged();
-                                Log.d("Activity", "Selected places from Firestore: " + this.selectedPlaces.toString());
+                            // Convert the document snapshot to TripClass (assuming TripClass has been defined)
+                            TripClass trip = documentSnapshot.toObject(TripClass.class);
+
+                            if (trip != null) {
+                                selectedPlaces = trip.getTripPlaces();
+                                if (selectedPlaces != null && !selectedPlaces.isEmpty()) {
+                                    // Update the adapter with selected places
+                                    adapter = new SelectingPlacesAdapter(this, filteredPlaceList, selectedPlaces);
+                                    selectingPlacesRecyclerView.setAdapter(adapter);
+                                    adapter.notifyDataSetChanged();
+                                    Log.d("Activity", "Selected places from Firestore: " + selectedPlaces.toString());
+                                } else {
+                                    adapter = new SelectingPlacesAdapter(SelectingPlacesActivity.this, filteredPlaceList, new ArrayList<>());
+                                    selectingPlacesRecyclerView.setAdapter(adapter);
+                                }
                             } else {
-                                adapter = new SelectingPlacesAdapter(SelectingPlacesActivity.this, filteredPlaceList, new ArrayList<>());
-                                selectingPlacesRecyclerView.setAdapter(adapter);
+                                Log.d("SelectedPlaces", "TripClass is null");
                             }
                         } else {
-                            // Handle document not found
+                            Log.d("SelectedPlaces", "Document does not exist");
                         }
                     })
                     .addOnFailureListener(e -> {
                         Log.e("Activity", "Failed to fetch selected places: " + e.getMessage());
                     });
+        } else {
+            Log.d("SelectedPlaces", "TripId is null");
         }
     }
+
 
     public void filterPlaces(String query) {
         filteredPlaceList.clear();
         String lowerCaseQuery = query.toLowerCase();
-        Log.d("filterPlaces", "Query: " + lowerCaseQuery);
+
 
         for (TourismPlaceClass place : allPlacesList) {
             String cityTitle = cityIdToNameMap.get(place.getCityId());
-            Log.d("filterPlaces", "Place Name: " + place.getPlaceName() + ", City Name: " + cityTitle);
+
             if (place.getPlaceName().toLowerCase().contains(lowerCaseQuery) ||
                     (cityTitle != null && cityTitle.toLowerCase().contains(lowerCaseQuery))) {
                 filteredPlaceList.add(place);
-                Log.d("filterPlaces", "Added Place: " + place.getPlaceName());
+
             }
         }
 

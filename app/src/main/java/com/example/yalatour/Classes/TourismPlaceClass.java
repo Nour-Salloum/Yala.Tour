@@ -82,4 +82,26 @@ public class TourismPlaceClass {
     public void setTotalRating(float totalRating) {
         this.totalRating = totalRating;
     }
+
+    public String toString() {
+        return "TourismPlaceClass{" +
+                "placeId='" + placeId + '\'' +
+                ", placeName='" + placeName + '\'' +
+                ", cityId='" + cityId + '\'' +
+                '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TourismPlaceClass that = (TourismPlaceClass) o;
+        return Objects.equals(placeId, that.placeId) &&
+                Objects.equals(placeName, that.placeName) &&
+                Objects.equals(cityId, that.cityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(placeId, placeName, cityId);
+    }
 }
