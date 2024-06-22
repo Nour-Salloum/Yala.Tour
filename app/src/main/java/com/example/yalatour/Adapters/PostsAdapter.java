@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,7 +74,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
                         // Show a toast indicating admin status
                         if (isAdmin != null) {
-                            showToast(isAdmin ? "You are an admin" : "You are not an admin");
                         }
                     }
                 })
@@ -136,6 +136,9 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         // Set images in ViewPager2
         ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(context, post.getPostImages());
         holder.PostImagePager.setAdapter(imagePagerAdapter);
+
+        // Setup image indicators
+        holder.setupImageIndicators(post.getPostImages().size());
 
         // Bind like/dislike button click listeners
         holder.bindLikeButton(post, context, this);
@@ -226,6 +229,9 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         private TextView likes;
         ViewPager2 PostImagePager;
 
+        // Add a LinearLayout or any other suitable layout to hold indicators
+        LinearLayout imageIndicatorContainer;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -240,7 +246,11 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             likeButton = mView.findViewById(R.id.LikeButton);
             dislikeButton = mView.findViewById(R.id.DislikeButton);
             likes = mView.findViewById(R.id.Likes);
+
             PostImagePager = itemView.findViewById(R.id.PostImagePager);
+
+            // Initialize imageIndicatorContainer
+            imageIndicatorContainer = mView.findViewById(R.id.imageIndicatorContainer);
 
 
         }
@@ -406,6 +416,46 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         }
         public void setLikes(int likesCount) {
             likes.setText(likesCount + (likesCount == 1 ? " like" : " likes"));
+        }
+
+        public void setupImageIndicators(int numImages) {
+            imageIndicatorContainer.removeAllViews(); // Clear existing indicators
+
+            // Create indicators for each image
+            ImageView[] indicators = new ImageView[numImages];
+            for (int i = 0; i < numImages; i++) {
+                indicators[i] = new ImageView(itemView.getContext());
+                indicators[i].setImageResource(R.drawable.indicator_inactive); // Set inactive indicator initially
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(8, 0, 8, 0); // Adjust margins as needed
+                indicators[i].setLayoutParams(layoutParams);
+
+                imageIndicatorContainer.addView(indicators[i]);
+            }
+
+            // Highlight the first indicator initially
+            if (numImages > 0) {
+                indicators[0].setImageResource(R.drawable.indicator_active); // Set the first indicator active
+            }
+
+            // ViewPager2 page change listener to update indicators
+            PostImagePager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+
+                    // Update indicators based on current page
+                    for (int i = 0; i < numImages; i++) {
+                        // Calculate the "opposite" position
+                        int oppositePosition = (numImages - 1) - position;
+
+                        indicators[i].setImageResource(
+                                i == oppositePosition ? R.drawable.indicator_active : R.drawable.indicator_inactive);
+                    }
+                }
+            });
         }
     }
     }

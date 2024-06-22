@@ -93,10 +93,23 @@
 
             </LinearLayout>
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/PostImagePager"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp" />
+                android:layout_height="match_parent">
+                <!-- Replace ImageView with ViewPager2 for post images -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/PostImagePager"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp" />
+                <!-- Image indicators container -->
+                <LinearLayout
+                    android:id="@+id/imageIndicatorContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="280dp"
+                    android:gravity="center"
+                    android:orientation="horizontal" />
+            </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/indicatorLayout"

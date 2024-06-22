@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +88,8 @@ public class CommentsActivity extends AppCompatActivity {
             if (postImages != null && !postImages.isEmpty()) {
                 ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(this, postImages);
                 postImagePager.setAdapter(imagePagerAdapter);
+                // Setup image indicators
+                setupImageIndicators(postImages.size());
             }
 
             // Load comments related to this post
@@ -95,6 +98,48 @@ public class CommentsActivity extends AppCompatActivity {
 
         // Set click listener for Send button
         findViewById(R.id.Send).setOnClickListener(v -> sendComment());
+    }
+
+    // Method to setup image indicators
+    private void setupImageIndicators(int numImages) {
+        LinearLayout imageIndicatorContainer = findViewById(R.id.imageIndicatorContainer);
+        imageIndicatorContainer.removeAllViews(); // Clear existing indicators
+
+        // Create indicators for each image
+        ImageView[] indicators = new ImageView[numImages];
+        for (int i = 0; i < numImages; i++) {
+            indicators[i] = new ImageView(this);
+            indicators[i].setImageResource(R.drawable.indicator_inactive); // Set inactive indicator initially
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(8, 0, 8, 0); // Adjust margins as needed
+            indicators[i].setLayoutParams(layoutParams);
+
+            imageIndicatorContainer.addView(indicators[i]);
+        }
+
+        // Highlight the first indicator initially
+        if (numImages > 0) {
+            indicators[0].setImageResource(R.drawable.indicator_active); // Set the first indicator active
+        }
+
+        // ViewPager2 page change listener to update indicators
+        postImagePager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                // Update indicators based on current page
+                for (int i = 0; i < numImages; i++) {
+                    // Calculate the "opposite" position
+                    int oppositePosition = (numImages - 1) - position;
+
+                    indicators[i].setImageResource(
+                            i == oppositePosition ? R.drawable.indicator_active : R.drawable.indicator_inactive);
+                }
+            }
+        });
     }
 
     private void loadComments(String postId) {
