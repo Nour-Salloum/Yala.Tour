@@ -47,7 +47,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
     List<String> imageUrls;
     FirebaseFirestore db;
     LinearLayout imagePicker;
-    String cityName;
+    String cityId;
     RecyclerView categoryRecyclerView;
     CategoryAdapter categoryAdapter;
 
@@ -68,8 +68,8 @@ public class UploadPlaceActivity extends AppCompatActivity {
         categoryRecyclerView = findViewById(R.id.categoryRecyclerView);
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Get city name passed from previous activity
-        cityName = getIntent().getStringExtra("cityName");
+        // Get city id passed from previous activity
+        cityId = getIntent().getStringExtra("cityId");
 
         // Populate categories in the RecyclerView
         populateCategories();
@@ -201,22 +201,23 @@ public class UploadPlaceActivity extends AppCompatActivity {
                     .centerCrop()
                     .into(imageView);
 
-            // Create the "X" button with custom margins
+// Create the "X" button with custom margins
             Button deselectButton = new Button(this);
             FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
+                    80,
+                    80
             );
-            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            buttonLayoutParams.setMargins(0, 0, 0, 0);
+            deselectButton.setPadding(0, 5, 0, 0);
             deselectButton.setLayoutParams(buttonLayoutParams);
-
             deselectButton.setText("X");
 
-            // Set button background and position
-            deselectButton.setBackgroundResource(R.drawable.styles);
-            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+// Set button background and text color
 
-            // Set the button click listener to remove the image
+            deselectButton.setTextColor(getResources().getColor(R.color.black)); // Set the text color
+            deselectButton.setBackgroundColor(getResources().getColor(R.color.red)); // Set the background color
+            deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+// Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -226,13 +227,12 @@ public class UploadPlaceActivity extends AppCompatActivity {
                     imageFrameLayout.removeView(deselectButton);
                     if (imageUrls.isEmpty()) {
                         imageContainer.setBackground(getResources().getDrawable(R.drawable.upload));
-                       imagePicker.setOnClickListener(new View.OnClickListener() {
+                        imagePicker.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 openImagePicker();
                             }
                         });
-
                     }
                 }
             });
@@ -241,6 +241,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
             imageFrameLayout.addView(deselectButton);
 
             currentRowLayout.addView(imageFrameLayout);
+
 
             count++;
         }
@@ -306,7 +307,7 @@ public class UploadPlaceActivity extends AppCompatActivity {
     private void savePlaceData(List<String> imageUrls, ProgressDialog progressDialog,
                                String placeName, String placeDesc, List<String> selectedCategories) {
         // Create a new document in the "TourismPlaces" collection with the provided data
-        TourismPlaceClass place = new TourismPlaceClass(null, placeName, placeDesc, selectedCategories, imageUrls, cityName,0);
+        TourismPlaceClass place = new TourismPlaceClass(null, placeName, placeDesc, selectedCategories, imageUrls, cityId,0);
         db.collection("TourismPlaces")
                 .add(place)
                 .addOnSuccessListener(documentReference -> {

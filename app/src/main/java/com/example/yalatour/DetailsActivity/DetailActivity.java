@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +31,7 @@ public class DetailActivity extends AppCompatActivity {
     ImageView detailImage;
     Button showTourismPlacesButton;
     ImageButton BackButton;
+    String cityId;
     ImageButton showHotelsButton,showHospitalsButton,showRestaurantsButton;
 
     @Override
@@ -51,6 +53,7 @@ public class DetailActivity extends AppCompatActivity {
             detailDesc.setText(bundle.getString("Description"));
             detailTitle.setText(bundle.getString("Title"));
             Glide.with(this).load(bundle.getString("Image")).into(detailImage);
+            cityId = bundle.getString("cityId");
         }
 
         // Set OnClickListener for the showHotelsButton
@@ -121,15 +124,13 @@ public class DetailActivity extends AppCompatActivity {
         showTourismPlacesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Assuming you have the city name as a string
-                String cityName = detailTitle.getText().toString();
+
 
                 // Create an intent to start the TourismPlacesActivity
                 Intent intent = new Intent(DetailActivity.this, TourismPlaces.class);
 
-                // Pass the city name to the TourismPlacesActivity
-                intent.putExtra("cityName", cityName);
-
+                // Pass the city id to the TourismPlacesActivity
+                intent.putExtra("cityId", cityId);
                 // Start the activity
                 startActivity(intent);
             }

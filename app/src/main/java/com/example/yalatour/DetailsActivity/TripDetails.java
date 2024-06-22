@@ -430,7 +430,7 @@ public class TripDetails extends AppCompatActivity {
                             // Add texts
                             List<String> memoryTexts = memory.getMemory_Texts();
                             if (memoryTexts != null && !memoryTexts.isEmpty()) {
-                                texts.addAll(memoryTexts); // Use a different variable name to avoid confusion
+                                texts.addAll(memoryTexts);
                             }
                         }
                     }
@@ -439,6 +439,7 @@ public class TripDetails extends AppCompatActivity {
                     memoryImageAdapter.notifyDataSetChanged();
                     memoryVideoAdapter.notifyDataSetChanged();
                     memoryTextAdapter.notifyDataSetChanged();
+                    updateMemoryButtons();
 
                 })
                 .addOnFailureListener(e -> {
@@ -554,10 +555,12 @@ public class TripDetails extends AppCompatActivity {
         if(isOldTrip && isUserAdmin){
             AddPlace.setVisibility(View.GONE);
             findViewById(R.id.Requests).setVisibility(View.GONE);
+            findViewById(R.id.Memories).setVisibility(View.VISIBLE);
         }
         else{
             AddPlace.setVisibility(View.VISIBLE);
             findViewById(R.id.Requests).setVisibility(View.VISIBLE);
+            findViewById(R.id.Memories).setVisibility(View.GONE);
         }
 
 
@@ -569,12 +572,23 @@ public class TripDetails extends AppCompatActivity {
         if (requestCode == UPLOAD_Memory_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null && data.getBooleanExtra("MemoryAdded", false)) {
                 fetchMemories();
+                updateMemoryButtons();
             }
         }
         if (requestCode == Edit_Memory_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null && data.getBooleanExtra("MemoryEdited", false)) {
                 fetchMemories();
+                updateMemoryButtons();
             }
+        }
+    }
+    private void updateMemoryButtons() {
+        if (getMemoryId() != null) {
+            EditMemory.setVisibility(View.VISIBLE);
+            AddMemory.setVisibility(View.GONE);
+        } else {
+            EditMemory.setVisibility(View.GONE);
+            AddMemory.setVisibility(View.VISIBLE);
         }
     }
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
@@ -617,7 +631,6 @@ public class TripDetails extends AppCompatActivity {
             RequirementsRecyclerView.setVisibility(View.GONE);
             Save.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.GONE);
-            MembersRecyclerView.setVisibility(View.GONE);
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
@@ -640,7 +653,6 @@ public class TripDetails extends AppCompatActivity {
             AddPlace.setVisibility(View.GONE);
             Save.setVisibility(View.VISIBLE);
             RequetsRecyclerView.setVisibility(View.GONE);
-            MembersRecyclerView.setVisibility(View.GONE);
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
@@ -664,7 +676,6 @@ public class TripDetails extends AppCompatActivity {
             Save.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.VISIBLE);
             RequetsRecyclerView.setVisibility(View.GONE);
-            MembersRecyclerView.setVisibility(View.GONE);
             AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
@@ -677,7 +688,6 @@ public class TripDetails extends AppCompatActivity {
             PlaceRecyclerView.setVisibility(View.GONE);
             AddPlace.setVisibility(View.GONE);
             Save.setVisibility(View.GONE);
-            MembersRecyclerView.setVisibility(View.GONE);
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.VISIBLE);
@@ -699,7 +709,6 @@ public class TripDetails extends AppCompatActivity {
             AddPlace.setVisibility(View.GONE);
             Save.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.GONE);
-            MembersRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
             AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);

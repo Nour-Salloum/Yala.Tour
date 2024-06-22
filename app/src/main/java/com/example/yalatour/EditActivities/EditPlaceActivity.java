@@ -241,20 +241,22 @@ public class EditPlaceActivity extends AppCompatActivity {
                     .centerCrop()
                     .into(imageView);
 
-            // Create the "X" button with custom margins
             Button deselectButton = new Button(this);
             FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
+                    80,
+                    80
             );
-            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            buttonLayoutParams.setMargins(0, 0, 0, 0);
+            deselectButton.setPadding(0, 5, 0, 0);
             deselectButton.setLayoutParams(buttonLayoutParams);
-
             deselectButton.setText("X");
 
-            // Set button background and position
-            deselectButton.setBackgroundResource(R.drawable.styles);
-            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+// Set button background and text color
+
+            deselectButton.setTextColor(getResources().getColor(R.color.black)); // Set the text color
+            deselectButton.setBackgroundColor(getResources().getColor(R.color.red)); // Set the background color
+            deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
 
             // Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {

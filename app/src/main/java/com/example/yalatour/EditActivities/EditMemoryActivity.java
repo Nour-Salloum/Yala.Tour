@@ -99,7 +99,12 @@ public class EditMemoryActivity extends AppCompatActivity {
         EditAddText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addNewMemoryText();
+                // Ensure MemoryEditText is not empty before adding new text
+                if (!MemoryEditText.getText().toString().trim().isEmpty()) {
+                    addNewMemoryText();
+                } else {
+                    Toast.makeText(EditMemoryActivity.this, "Please enter some text before adding.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         MoreMemories.setOnClickListener(new View.OnClickListener() {
@@ -164,20 +169,24 @@ public class EditMemoryActivity extends AppCompatActivity {
     }
 
     private void addNewMemoryText() {
-        EditText newMemoryText = new EditText(this);
+        String newText = MemoryEditText.getText().toString().trim();
+        if (!newText.isEmpty()) {
+            EditText newMemoryText = new EditText(this);
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                815, // Width in pixels
-                170  // Height in pixels
-        );
-        layoutParams.setMargins(0, 15, 0, 0);
-        newMemoryText.setLayoutParams(layoutParams);
-        newMemoryText.setHint("Enter Text");
-        newMemoryText.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-        newMemoryText.setBackground(ContextCompat.getDrawable(this, R.drawable.lavender_boarder));
-        newMemoryText.setPadding(16, 16, 16, 16);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    815, // Width in pixels
+                    170  // Height in pixels
+            );
+            layoutParams.setMargins(0, 15, 0, 0);
+            newMemoryText.setLayoutParams(layoutParams);
+            newMemoryText.setText(newText);  // Set the new text
+            newMemoryText.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            newMemoryText.setBackground(ContextCompat.getDrawable(this, R.drawable.lavender_boarder));
+            newMemoryText.setPadding(20, 16, 16, 16);
 
-        EditdynamicTextContainer.addView(newMemoryText);
+            EditdynamicTextContainer.addView(newMemoryText);
+            MemoryEditText.setText("");  // Clear the MemoryEditText
+        }
     }
 
     private void captureTexts() {
@@ -336,21 +345,19 @@ public class EditMemoryActivity extends AppCompatActivity {
                         .centerCrop()
                         .into(imageView);
 
-                // Create the "X" button with custom margins
                 Button deselectButton = new Button(this);
                 FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
+                        80,
+                        80
                 );
-                buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+                buttonLayoutParams.setMargins(0, 0, 0, 0);
+                deselectButton.setPadding(0, 5, 0, 0);
                 deselectButton.setLayoutParams(buttonLayoutParams);
-
                 deselectButton.setText("X");
 
-                // Set button background and position
-                deselectButton.setBackgroundResource(R.drawable.styles);
-                deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
-
+                deselectButton.setTextColor(getResources().getColor(R.color.black));
+                deselectButton.setBackgroundColor(getResources().getColor(R.color.red));
+                deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 // Set the button click listener to remove the image
                 deselectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -408,20 +415,19 @@ public class EditMemoryActivity extends AppCompatActivity {
                         .centerCrop()
                         .into(videoThumbnail);
 
-                // Create the "X" button with custom margins
                 Button deselectButton = new Button(this);
                 FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
+                        80,
+                        80
                 );
-                buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+                buttonLayoutParams.setMargins(0, 0, 0, 0);
+                deselectButton.setPadding(0, 5, 0, 0);
                 deselectButton.setLayoutParams(buttonLayoutParams);
-
                 deselectButton.setText("X");
 
-                // Set button background and position
-                deselectButton.setBackgroundResource(R.drawable.styles);
-                deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+                deselectButton.setTextColor(getResources().getColor(R.color.black));
+                deselectButton.setBackgroundColor(getResources().getColor(R.color.red));
+                deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
                 // Set the button click listener to remove the video
                 deselectButton.setOnClickListener(new View.OnClickListener() {

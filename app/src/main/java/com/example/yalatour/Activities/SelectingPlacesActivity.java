@@ -20,13 +20,15 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SelectingPlacesActivity extends AppCompatActivity {
 
     RecyclerView selectingPlacesRecyclerView;
     List<TourismPlaceClass> allPlacesList;
-    List<TourismPlaceClass> filteredPlaceList; // Changed to instance variable
+    List<TourismPlaceClass> filteredPlaceList;
     FirebaseFirestore db;
     TextView done;
     String tripId;
@@ -34,6 +36,7 @@ public class SelectingPlacesActivity extends AppCompatActivity {
     List<TourismPlaceClass> selectedPlaces;
     SearchView SelectingPlacesSearchView;
     ImageButton BackButton;
+    private Map<String, String> cityIdToNameMap; // Map to store city names
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +46,13 @@ public class SelectingPlacesActivity extends AppCompatActivity {
         selectingPlacesRecyclerView = findViewById(R.id.SlectingPlacesrecyclerView);
         selectingPlacesRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         SelectingPlacesSearchView = findViewById(R.id.SelectingPlacesearchView);
-        BackButton=findViewById(R.id.BackButton);
+        BackButton = findViewById(R.id.BackButton);
         db = FirebaseFirestore.getInstance();
         tripId = getIntent().getStringExtra("TripId");
         allPlacesList = new ArrayList<>();
         done = findViewById(R.id.DoneAddingPlaces);
         selectedPlaces = new ArrayList<>();
-        filteredPlaceList = new ArrayList<>(); // Initialize filteredPlaceList
+        filteredPlaceList = new ArrayList<>();
         adapter = new SelectingPlacesAdapter(this, filteredPlaceList, selectedPlaces);
         selectingPlacesRecyclerView.setAdapter(adapter);
         fetchSelectedPlaces();
@@ -70,6 +73,7 @@ public class SelectingPlacesActivity extends AppCompatActivity {
                         });
             }
         });
+
         BackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,7 +81,7 @@ public class SelectingPlacesActivity extends AppCompatActivity {
             }
         });
 
-        fetchAllPlaces();
+        fetchCityNames();
         SelectingPlacesSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -92,6 +96,23 @@ public class SelectingPlacesActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchCityNames() {
+        cityIdToNameMap = new HashMap<>();
+        db.collection("Cities")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String cityId = document.getId();
+                            String cityTitle = document.getString("cityTitle");
+                            cityIdToNameMap.put(cityId, cityTitle);
+
+                        }
+                        fetchAllPlaces();
+                    }
+                });
+    }
+
     public void fetchAllPlaces() {
         db.collection("TourismPlaces")
                 .get()
@@ -101,9 +122,9 @@ public class SelectingPlacesActivity extends AppCompatActivity {
                         for (DocumentSnapshot document : task.getResult()) {
                             TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
                             allPlacesList.add(place);
+                            Log.d("fetchAllPlaces", "Place Name: " + place.getPlaceName() + ", City ID: " + place.getCityId());
                         }
                         filterPlaces(SelectingPlacesSearchView.getQuery().toString());
-
                     } else {
                         // Handle errors
                         Log.e("Activity", "Failed to fetch all places: ", task.getException());
@@ -136,15 +157,19 @@ public class SelectingPlacesActivity extends AppCompatActivity {
                     });
         }
     }
+
     public void filterPlaces(String query) {
-
-            filteredPlaceList.clear();
-
-
+        filteredPlaceList.clear();
         String lowerCaseQuery = query.toLowerCase();
+        Log.d("filterPlaces", "Query: " + lowerCaseQuery);
+
         for (TourismPlaceClass place : allPlacesList) {
-            if (place.getPlaceName().toLowerCase().contains(lowerCaseQuery) || place.getCityName().toLowerCase().contains(lowerCaseQuery)) {
+            String cityTitle = cityIdToNameMap.get(place.getCityId());
+            Log.d("filterPlaces", "Place Name: " + place.getPlaceName() + ", City Name: " + cityTitle);
+            if (place.getPlaceName().toLowerCase().contains(lowerCaseQuery) ||
+                    (cityTitle != null && cityTitle.toLowerCase().contains(lowerCaseQuery))) {
                 filteredPlaceList.add(place);
+                Log.d("filterPlaces", "Added Place: " + place.getPlaceName());
             }
         }
 

@@ -18,9 +18,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.yalatour.Classes.MemoriesClass;
@@ -81,9 +79,14 @@ public class UploadMemoryActivity extends AppCompatActivity {
         AddText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addNewMemoryText();
+                if (MemoryText.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(UploadMemoryActivity.this, "Please enter text before adding", Toast.LENGTH_SHORT).show();
+                } else {
+                    addNewMemoryText();
+                }
             }
         });
+
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,7 +133,6 @@ public class UploadMemoryActivity extends AppCompatActivity {
         });
     }
 
-
     private void openPicker() {
         Intent mediaPicker = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         mediaPicker.setType("*/*");
@@ -141,27 +143,34 @@ public class UploadMemoryActivity extends AppCompatActivity {
     }
 
     private void addNewMemoryText() {
-        EditText newMemoryText = new EditText(this);
+        String memoryTextContent = MemoryText.getText().toString().trim();
+        if (!memoryTextContent.isEmpty()) {
+            EditText newMemoryText = new EditText(this);
 
-        // Set fixed width and height
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                815, // Width in pixels
-                170  // Height in pixels
-        );
-        layoutParams.setMargins(0, 15, 0, 0);
-        newMemoryText.setLayoutParams(layoutParams);
+            // Set fixed width and height
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    815, // Width in pixels
+                    170  // Height in pixels
+            );
+            layoutParams.setMargins(0, 15, 0, 0);
+            newMemoryText.setLayoutParams(layoutParams);
 
-        // Set other attributes
-        newMemoryText.setId(ViewCompat.generateViewId());
-        newMemoryText.setHint("Enter Text");
-        newMemoryText.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-        newMemoryText.setBackground(ContextCompat.getDrawable(this, R.drawable.lavender_boarder));
-        newMemoryText.setPadding(16, 16, 16, 16);
+            // Set other attributes
+            newMemoryText.setId(ViewCompat.generateViewId());
+            newMemoryText.setHint("Enter Text");
+            newMemoryText.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            newMemoryText.setBackground(ContextCompat.getDrawable(this, R.drawable.lavender_boarder));
+            newMemoryText.setPadding(20, 16, 16, 16);
+            newMemoryText.setTextColor(ContextCompat.getColor(this, R.color.black));
+            newMemoryText.setText(memoryTextContent);
 
-        newMemoryText.setTextColor(ContextCompat.getColor(this, R.color.lavender));
+            dynamicTextContainer.addView(newMemoryText);
 
-        dynamicTextContainer.addView(newMemoryText);
+            // Clear the MemoryText field
+            MemoryText.setText("");
+        }
     }
+
     private List<String> getNonEmptyTexts() {
         List<String> nonEmptyTexts = new ArrayList<>();
 
@@ -175,19 +184,14 @@ public class UploadMemoryActivity extends AppCompatActivity {
                 EditText editText = (EditText) view;
                 String text = editText.getText().toString().trim();
 
-
                 if (!text.isEmpty()) {
                     nonEmptyTexts.add(text);
                 }
-
             }
         }
 
         return nonEmptyTexts;
     }
-
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -271,21 +275,19 @@ public class UploadMemoryActivity extends AppCompatActivity {
                     .centerCrop()
                     .into(imageView);
 
-            // Create the "X" button with custom margins
             Button deselectButton = new Button(this);
             FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
+                    80,
+                    80
             );
-            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            buttonLayoutParams.setMargins(0, 0, 0, 0);
+            deselectButton.setPadding(0, 5, 0, 0);
             deselectButton.setLayoutParams(buttonLayoutParams);
-
             deselectButton.setText("X");
 
-            // Set button background and position
-            deselectButton.setBackgroundResource(R.drawable.styles);
-            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
-
+            deselectButton.setTextColor(getResources().getColor(R.color.black));
+            deselectButton.setBackgroundColor(getResources().getColor(R.color.red));
+            deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             // Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -341,20 +343,19 @@ public class UploadMemoryActivity extends AppCompatActivity {
                     .centerCrop()
                     .into(videoThumbnail);
 
-            // Create the "X" button with custom margins
             Button deselectButton = new Button(this);
             FrameLayout.LayoutParams buttonLayoutParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
+                    80,
+                    80
             );
-            buttonLayoutParams.setMargins(10, -20, 0, 0); // Adjust margins as needed
+            buttonLayoutParams.setMargins(0, 0, 0, 0);
+            deselectButton.setPadding(0, 5, 0, 0);
             deselectButton.setLayoutParams(buttonLayoutParams);
-
             deselectButton.setText("X");
 
-            // Set button background and position
-            deselectButton.setBackgroundResource(R.drawable.styles);
-            deselectButton.setGravity(Gravity.LEFT | Gravity.TOP);
+            deselectButton.setTextColor(getResources().getColor(R.color.black));
+            deselectButton.setBackgroundColor(getResources().getColor(R.color.red));
+            deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
             // Set the button click listener to remove the video
             deselectButton.setOnClickListener(new View.OnClickListener() {
