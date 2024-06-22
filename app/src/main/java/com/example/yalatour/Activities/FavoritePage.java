@@ -5,6 +5,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +39,8 @@ public class FavoritePage extends AppCompatActivity {
         favoritePlaces = new ArrayList<>();
         favoritesAdapter = new FavoritesAdapter(this, favoritePlaces);
         favoriteRecyclerView.setAdapter(favoritesAdapter);
+
+        favoriteRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();

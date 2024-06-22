@@ -1,29 +1,46 @@
 package com.example.yalatour.Adapters;
 
+import static com.example.yalatour.Classes.MessageService.TAG;
+
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.yalatour.Activities.CommentsActivity;
 import com.example.yalatour.Activities.HomePage;
+import com.example.yalatour.Classes.Comment;
 import com.example.yalatour.Classes.Post;
 import com.example.yalatour.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -32,7 +49,9 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
     private List<Post> postList;
     private Context context;
     private boolean isAdmin;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    private CommentsAdapter adapter;
     public PostsAdapter(Context context) {
         this.context = context;
         this.postList = new ArrayList<>();
@@ -109,8 +128,24 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         holder.setDate(post.getDate());
         holder.setDescription(post.getDescription());
         holder.setPlacename(post.getPlacename());
-        holder.setPostimage(context, post.getPostimage());
         holder.setProfileImage(context, post.getProfileImageUrl());
+
+        holder.setLikes(post.getNumLikes());
+
+
+        // Set images in ViewPager2
+        ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(context, post.getPostImages());
+        holder.PostImagePager.setAdapter(imagePagerAdapter);
+
+        // Bind like/dislike button click listeners
+        holder.bindLikeButton(post, context, this);
+
+
+        // Load Comments
+        loadComments(post.getPostId(), holder);
+
+        // Pass adapter and position
+        holder.saveCommentData(post.getPostId(), context, this, position);
 
         // Set visibility of deletePost based on isAdmin
         holder.deletePost.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
@@ -123,9 +158,50 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         // Setup delete button listener
         holder.bindDeleteButton(post, context, postList, this);
 
-        // Setup like and dislike button listeners
-        holder.bindLikeDislikeButtons(post, this);
+
+        // Setup all comments button listener
+        holder.allComments.setOnClickListener(v -> {
+            Intent intent = new Intent(context, CommentsActivity.class);
+            intent.putExtra("postId", post.getPostId());
+            intent.putExtra("username", post.getUsername());
+            intent.putExtra("date", post.getDate());
+            intent.putExtra("time", post.getTime());
+            intent.putExtra("description", post.getDescription());
+            intent.putExtra("placeName", post.getPlacename());
+            intent.putExtra("profileImageUrl", post.getProfileImageUrl());
+            intent.putStringArrayListExtra("postImages", (ArrayList<String>) post.getPostImages()); // Pass List<String> as ArrayList<String>
+            context.startActivity(intent);
+        });
+
     }
+
+    private void loadComments(String postId, ViewHolder holder) {
+        db.collection("Comments")
+                .whereEqualTo("postId", postId)
+                .orderBy("commentDate", Query.Direction.DESCENDING)
+                .limit(1) // Limit to the last 2 comments
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Comment> comments = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Comment comment = doc.toObject(Comment.class);
+                        comment.setCommentId(doc.getId());
+                        comments.add(comment);
+                    }
+
+                    // Bind comments to CommentsRecyclerView using CommentsAdapter
+                    CommentsAdapter commentsAdapter = new CommentsAdapter(context, comments);
+                    holder.CommentsRecyclerView.setAdapter(commentsAdapter);
+                    holder.CommentsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading comments", e);
+                    Toast.makeText(context, "Failed to load comments: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+
 
     @Override
     public int getItemCount() {
@@ -137,16 +213,36 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         notifyItemRemoved(position);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         View mView;
         ImageView editPost;
         ImageView deletePost;
+        TextView allComments;
+        EditText CommentText;
+        Button Send;
+        RecyclerView CommentsRecyclerView;
+        private ImageButton likeButton;
+        private ImageButton dislikeButton;
+        private TextView likes;
+        ViewPager2 PostImagePager;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
             editPost = mView.findViewById(R.id.EditPost);
             deletePost = mView.findViewById(R.id.DeletePost);
+            allComments = mView.findViewById(R.id.AllComments);
+            CommentText = mView.findViewById(R.id.CommentText);
+            Send = mView.findViewById(R.id.Send);
+            CommentsRecyclerView = mView.findViewById(R.id.CommentsRecyclerView);
+
+            likeButton = mView.findViewById(R.id.LikeButton);
+            dislikeButton = mView.findViewById(R.id.DislikeButton);
+            likes = mView.findViewById(R.id.Likes);
+            PostImagePager = itemView.findViewById(R.id.PostImagePager);
+
+
         }
 
         public void setUsername(String username) {
@@ -174,10 +270,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             placeName.setText(placename);
         }
 
-        public void setPostimage(Context ctx, String postimage) {
-            ImageView postImage = mView.findViewById(R.id.PostImage);
-            Picasso.get().load(postimage).into(postImage);
-        }
 
         public void setProfileImage(Context ctx, String profileImageUrl) {
             CircleImageView profileImage = mView.findViewById(R.id.ProfileImage);
@@ -223,45 +315,101 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             });
         }
 
-        public void bindLikeDislikeButtons(Post post, PostsAdapter adapter) {
-            ImageButton likeButton = mView.findViewById(R.id.LikeButton);
-            ImageButton dislikeButton = mView.findViewById(R.id.DislikeButton);
 
+        private String getCurrentDateTime() {
+            // Replace with your date formatting logic
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            return df.format(new Date());
+        }
+        public void saveCommentData(String postId, Context context, PostsAdapter adapter, int position) {
+            Send.setOnClickListener(v -> {
+                String commentText = CommentText.getText().toString().trim();
+                if (!TextUtils.isEmpty(commentText)) {
+                    String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                    // Get username and profileImageUrl from Firestore "Users" collection
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("Users").document(currentUserId)
+                            .get()
+                            .addOnSuccessListener(documentSnapshot -> {
+                                if (documentSnapshot.exists()) {
+                                    String username = documentSnapshot.getString("username");
+                                    String profileImageUrl = documentSnapshot.getString("profileImageUrl");
+                                    String commentDate = getCurrentDateTime(); // Ensure this method returns a valid date format
+
+                                    // Create a Comment object
+                                    Comment comment = new Comment(null, username, postId, commentDate, commentText, profileImageUrl);
+
+                                    // Access Firestore instance and add comment
+                                    FirebaseFirestore dbComments = FirebaseFirestore.getInstance();
+                                    dbComments.collection("Comments")
+                                            .add(comment)
+                                            .addOnSuccessListener(documentReference -> {
+                                                Toast.makeText(context, "Comment added successfully", Toast.LENGTH_SHORT).show();
+                                                adapter.notifyDataSetChanged();
+                                                CommentText.setText(""); // Clear comment text field after successful addition
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(context, "Failed to add comment: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                Log.e(TAG, "Error adding comment", e); // Log error for debugging
+                                            });
+                                } else {
+                                    Toast.makeText(context, "User document doesn't exist", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(context, "Failed to fetch user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e(TAG, "Error fetching user data", e); // Log error for debugging
+                            });
+                } else {
+                    Toast.makeText(context, "Comment cannot be empty", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+
+
+        public void bindLikeButton(Post post, Context context, PostsAdapter adapter) {
             likeButton.setOnClickListener(v -> {
-                // Increment likes by 1
-                post.setLikes(post.getLikes() + 1);
-
-                // Update UI
                 likeButton.setVisibility(View.GONE);
                 dislikeButton.setVisibility(View.VISIBLE);
 
-                // Update likes text view
-                updateLikesTextView(post.getLikes());
+                // Update number of likes in Firestore
+                int updatedLikes = post.getNumLikes() + 1;
+                updateLikes(post.getPostId(), updatedLikes);
 
-                // Notify adapter
-                adapter.notifyDataSetChanged();
+                // Update local post object
+                post.setNumLikes(updatedLikes);
+                setLikes(updatedLikes); // Update likes count in UI
             });
 
             dislikeButton.setOnClickListener(v -> {
-                // Decrement likes by 1
-                post.setLikes(post.getLikes() - 1);
-
-                // Update UI
-                likeButton.setVisibility(View.VISIBLE);
                 dislikeButton.setVisibility(View.GONE);
+                likeButton.setVisibility(View.VISIBLE);
 
-                // Update likes text view
-                updateLikesTextView(post.getLikes());
+                // Update number of likes in Firestore
+                int updatedLikes = post.getNumLikes() - 1;
+                updateLikes(post.getPostId(), updatedLikes);
 
-                // Notify adapter
-                adapter.notifyDataSetChanged();
+                // Update local post object
+                post.setNumLikes(updatedLikes);
+                setLikes(updatedLikes); // Update likes count in UI
             });
         }
 
-        private void updateLikesTextView(int likes) {
-            TextView likesTextView = mView.findViewById(R.id.Likes);
-            likesTextView.setText(likes + " likes");
+        private void updateLikes(String postId, int updatedLikes) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("Posts").document(postId)
+                    .update("numLikes", updatedLikes)
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+        }
+        public void setLikes(int likesCount) {
+            likes.setText(likesCount + (likesCount == 1 ? " like" : " likes"));
         }
     }
+    }
 
-}
+
+
+
