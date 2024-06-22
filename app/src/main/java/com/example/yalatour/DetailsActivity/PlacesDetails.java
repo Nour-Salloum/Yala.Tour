@@ -82,7 +82,6 @@ public class PlacesDetails extends AppCompatActivity {
         Description = findViewById(R.id.Description);
         PlaceImageView = findViewById(R.id.PlaceImageView);
         Add = findViewById(R.id.AddToTrip);
-        Favorite = findViewById(R.id.AddToFavorite);
         Location = findViewById(R.id.Location);
         BackButton=findViewById(R.id.BackButton);
         backgroundImageView = findViewById(R.id.backgroundImageView);

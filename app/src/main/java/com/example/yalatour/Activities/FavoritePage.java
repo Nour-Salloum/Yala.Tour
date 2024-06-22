@@ -1,9 +1,12 @@
 package com.example.yalatour.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.yalatour.Adapters.FavoritesAdapter;
 import com.example.yalatour.Classes.TourismPlaceClass;
 import com.example.yalatour.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -80,4 +84,32 @@ public class FavoritePage extends AppCompatActivity {
                     Log.e("FavoritePage", "Error loading favorites", e);
                 });
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(FavoritePage.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(FavoritePage.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(FavoritePage.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(FavoritePage.this, FavoritePage.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(FavoritePage.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
 }
