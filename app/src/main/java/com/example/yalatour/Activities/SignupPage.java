@@ -1,9 +1,9 @@
 package com.example.yalatour.Activities;
 
+// Import necessary packages
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,7 +27,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -42,6 +41,7 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SignupPage extends AppCompatActivity {
+    // Declare UI elements and Firebase components
     private EditText email, password, username;
     private CircleImageView ProfileImage;
     private Button Signup;
@@ -106,7 +106,7 @@ public class SignupPage extends AppCompatActivity {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     if (e instanceof FirebaseAuthUserCollisionException) {
-
+                                        // Handle user collision
                                     } else {
                                         Toast.makeText(SignupPage.this, "Failed to Create Account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
@@ -119,8 +119,7 @@ public class SignupPage extends AppCompatActivity {
             }
         });
 
-
-
+        // Profile image click listener
         ProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,6 +130,7 @@ public class SignupPage extends AppCompatActivity {
             }
         });
 
+        // Toggle button for showing/hiding password
         ShowPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -145,6 +145,7 @@ public class SignupPage extends AppCompatActivity {
             }
         });
 
+        // Redirect to login page
         gotoLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,7 +156,7 @@ public class SignupPage extends AppCompatActivity {
         });
     }
 
-    // Inside sendEmailVerification method
+    // Send email verification to the user
     private void sendEmailVerification(FirebaseUser user) {
         user.sendEmailVerification()
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -173,7 +174,6 @@ public class SignupPage extends AppCompatActivity {
                 });
     }
 
-    // Listener for email verification completion
     // Listener for email verification completion
     private void startEmailVerificationListener(FirebaseUser user) {
         new Thread(new Runnable() {
@@ -223,7 +223,7 @@ public class SignupPage extends AppCompatActivity {
         }).start();
     }
 
-
+    // Create account in Firestore
     private void CreateAccountinFirestore() {
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
@@ -242,6 +242,7 @@ public class SignupPage extends AppCompatActivity {
                 });
     }
 
+    // Upload profile image to Firebase Storage
     private void uploadProfileImage() {
         if (profileImageUri != null) {
             StorageReference filepath = UserProfileImageReference.child("profile_images").child(currentUserId + ".jpg");
@@ -267,6 +268,7 @@ public class SignupPage extends AppCompatActivity {
         }
     }
 
+    // Save user information to Firestore
     private void saveUserToFirestore(String profileImageUrl) {
         User user = new User(username.getText().toString(), email.getText().toString(), true, fcmTokenList, profileImageUrl);
 
@@ -289,6 +291,7 @@ public class SignupPage extends AppCompatActivity {
                 });
     }
 
+    // Handle result of profile image selection
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -298,6 +301,7 @@ public class SignupPage extends AppCompatActivity {
         }
     }
 
+    // Validate input fields
     public boolean checkField(EditText textField) {
         boolean valid = true;
         if (textField.getText().toString().isEmpty()) {

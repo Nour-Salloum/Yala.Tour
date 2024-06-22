@@ -50,6 +50,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     private String selectedCity;
     private FirebaseFirestore db;
 
+    // Constructor with selected city
     public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList, String selectedCity) {
         this.context = context;
         this.placeList = placeList;
@@ -57,6 +58,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         this.db = FirebaseFirestore.getInstance();
     }
 
+    // Constructor without selected city
     public TourismPlaceAdapter(Context context, List<TourismPlaceClass> placeList) {
         this.context = context;
         this.placeList = placeList;
@@ -74,20 +76,24 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TourismPlaceClass place = placeList.get(position);
 
-
         // Call checkIfPlaceIsFavorite synchronously before setting button click listeners
         checkIfPlaceIsFavorite(place, holder);
 
+        // Truncate the place title if it's too long
         String placeTitle = place.getPlaceName();
         if (placeTitle.length() > 20) { // Adjust the length as needed
             placeTitle = placeTitle.substring(0, 15) + "...";
         }
         holder.placeTitle.setText(placeTitle);
+
+        // Load the place image using Glide
         Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
 
+        // Set onClick listener for the place card
         holder.placeCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Start PlacesDetails activity with the place details
                 Intent intent = new Intent(context, PlacesDetails.class);
                 intent.putExtra("placeName", place.getPlaceName());
                 intent.putExtra("placeDescription", place.getPlaceDescription());
@@ -98,9 +104,11 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
 
+        // Set onClick listener for the edit button
         holder.EditPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Start EditPlaceActivity with the place details for editing
                 Intent intent = new Intent(context, EditPlaceActivity.class);
                 intent.putExtra("placeName", place.getPlaceName());
                 intent.putExtra("placeDescription", place.getPlaceDescription());
@@ -111,6 +119,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
 
+        // Set onClick listener for the delete button
         holder.Delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,8 +129,8 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Delete the place
-                               deletePlaceFromFirestore(place,position);
+                                // Delete the place from Firestore
+                                deletePlaceFromFirestore(place,position);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -136,10 +145,12 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
 
+        // Firebase authentication and Firestore instances
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+        // Check if the current user is an admin and show/hide edit and delete buttons accordingly
         if (currentUser != null) {
             String userId = currentUser.getUid();
 
@@ -167,7 +178,6 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         }
 
         // Handle the add to favorite button click
-
         holder.addfavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,14 +185,13 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
             }
         });
 
+        // Handle the remove from favorite button click
         holder.removefavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 removePlaceFromFavorite(place, holder);
             }
         });
-
-
     }
 
     @Override
@@ -208,6 +217,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         }
     }
 
+    // Method to add a place to favorites
     private void addPlaceToFavorite(TourismPlaceClass place, ViewHolder holder) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -246,6 +256,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         }).addOnFailureListener(e -> Toast.makeText(context, "Failed to access favorites", Toast.LENGTH_SHORT).show());
     }
 
+    // Method to remove a place from favorites
     private void removePlaceFromFavorite(TourismPlaceClass place, ViewHolder holder) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -284,6 +295,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 .addOnFailureListener(e -> Toast.makeText(context, "Failed to remove from favorites", Toast.LENGTH_SHORT).show());
     }
 
+    // Method to check if a place is in the user's favorites
     private void checkIfPlaceIsFavorite(TourismPlaceClass place, ViewHolder holder) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -320,6 +332,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
         });
     }
 
+    // Method to delete a place from Firestore
     public void deletePlaceFromFirestore(TourismPlaceClass place, int position) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String placeId = place.getPlaceId();
@@ -328,6 +341,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 .delete()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        // Delete related reviews, ratings, and images
                         deleteReviews(placeId);
                         deleteRatings(placeId);
                         deletePlaceImages(place.getPlaceImages());
@@ -341,6 +355,8 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     }
                 });
     }
+
+    // Overloaded method to delete a place from Firestore without position
     public void deletePlaceFromFirestore(TourismPlaceClass place) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -361,8 +377,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 });
     }
 
-
-
+    // Method to delete reviews of a place
     private void deleteReviews(String placeId) {
         db.collection("Reviews")
                 .whereEqualTo("review_placeid", placeId)
@@ -379,6 +394,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 });
     }
 
+    // Method to delete ratings of a place
     private void deleteRatings(String placeId) {
         db.collection("Ratings")
                 .whereEqualTo("rating_Placeid", placeId)
@@ -395,6 +411,7 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                 });
     }
 
+    // Method to delete images of a place from Firebase Storage
     private void deletePlaceImages(List<String> imageUrls) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -415,5 +432,4 @@ public class TourismPlaceAdapter extends RecyclerView.Adapter<TourismPlaceAdapte
                     });
         }
     }
-
 }

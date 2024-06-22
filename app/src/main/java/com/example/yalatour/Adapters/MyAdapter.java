@@ -38,11 +38,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private List<CityClass> cityList;
     private FirebaseFirestore db;
 
+    // Constructor to initialize the adapter with context and city list
     public MyAdapter(Context context, List<CityClass> cityList) {
         this.context = context;
         this.cityList = cityList;
         db = FirebaseFirestore.getInstance();
     }
+
+    // Inflates the layout for each item in the RecyclerView
 
     @NonNull
     @Override
@@ -54,10 +57,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         CityClass city = cityList.get(position);
+        // Load city image using Glide library
         Glide.with(context).load(city.getCityImage()).into(holder.recImage);
+        // Set city title and area
         holder.recTitle.setText(city.getCityTitle());
         holder.Area.setText(city.getCityArea());
 
+        // Handle click on card to view city details
         holder.recCard.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailActivity.class);
             intent.putExtra("Image", city.getCityImage());
@@ -66,7 +72,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             intent.putExtra("cityId", city.getCityId());
             context.startActivity(intent);
         });
-
+        // Handle click on edit button to edit city
         holder.EditCity.setOnClickListener(v -> {
             Intent intent = new Intent(context, EditCityActivity.class);
             intent.putExtra("Image", city.getCityImage());
@@ -76,7 +82,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             intent.putExtra("cityId", city.getCityId());
             context.startActivity(intent);
         });
-
+        // Handle click on delete button to delete city
         holder.DeleteCity.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setMessage("Are you sure you want to delete this city?")
@@ -89,6 +95,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+        // Check if current user is admin to show/hide edit and delete buttons
         if (currentUser != null) {
             String userId = currentUser.getUid();
 
@@ -139,11 +146,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         }
     }
 
+    // Method to delete a city
     private void deleteCity(CityClass city, int position) {
         db.collection("Cities").document(city.getCityId())
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    deleteCityPlaces(city.getCityTitle());
+                    deleteCityPlaces(city.getCityId());
                     deleteImageFromStorage(city.getCityImage());
                     cityList.remove(position);
                     notifyItemRemoved(position);
@@ -151,6 +159,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 .addOnFailureListener(e -> Log.e("MyAdapter", "Error deleting city document: " + e.getMessage(), e));
     }
 
+    // Method to delete all places associated with a city
     private void deleteCityPlaces(String cityId) {
         getPlacesForCity(cityId, placesList -> {
             TourismPlaceAdapter tourismPlaceAdapter = new TourismPlaceAdapter(context, placesList, cityId);
@@ -160,6 +169,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         });
     }
 
+    // Method to delete an image from Firebase Storage
     private void deleteImageFromStorage(String imageUrl) {
         StorageReference imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
         imageRef.delete()
@@ -167,6 +177,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 .addOnFailureListener(e -> Log.e("MyAdapter", "Error deleting image: " + e.getMessage(), e));
     }
 
+    // Method to fetch all places for a city from Firestore
     private void getPlacesForCity(String cityId, FirestoreCallback callback) {
         db.collection("TourismPlaces")
                 .whereEqualTo("cityId", cityId)
@@ -185,6 +196,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 });
     }
 
+    // Callback interface for Firestore operations
     private interface FirestoreCallback {
         void onCallback(List<TourismPlaceClass> placesList);
     }

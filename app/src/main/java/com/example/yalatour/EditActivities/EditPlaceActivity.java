@@ -1,6 +1,5 @@
 package com.example.yalatour.EditActivities;
 
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -60,7 +59,7 @@ public class EditPlaceActivity extends AppCompatActivity {
         PlaceName = findViewById(R.id.EditPlaceName);
         PlaceDesc = findViewById(R.id.EditPlaceDesc);
         Edit_imagePicker = findViewById(R.id.Edit_imageContainer);
-        MoreImages=findViewById(R.id.MoreImages);
+        MoreImages = findViewById(R.id.MoreImages);
         Edit = findViewById(R.id.EditPlaceButton);
 
         // Set click listener for image picker
@@ -141,7 +140,7 @@ public class EditPlaceActivity extends AppCompatActivity {
         startActivityForResult(photoPicker, 1);
     }
 
-
+    // Override onActivityResult method
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -174,6 +173,7 @@ public class EditPlaceActivity extends AppCompatActivity {
         // Get Firebase storage reference
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference().child("TourismPlaces/" + System.currentTimeMillis() + ".jpg");
+
         // Upload image to storage
         storageRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> {
@@ -192,7 +192,7 @@ public class EditPlaceActivity extends AppCompatActivity {
                 });
     }
 
-
+    // Method to display selected images
     private void displaySelectedImages(List<String> imageUrls) {
         imageContainer = findViewById(R.id.Edit_imageContainer);
         imageContainer.removeAllViews();
@@ -251,12 +251,10 @@ public class EditPlaceActivity extends AppCompatActivity {
             deselectButton.setLayoutParams(buttonLayoutParams);
             deselectButton.setText("X");
 
-// Set button background and text color
-
+            // Set button background and text color
             deselectButton.setTextColor(getResources().getColor(R.color.black)); // Set the text color
             deselectButton.setBackgroundColor(getResources().getColor(R.color.red)); // Set the background color
             deselectButton.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-
 
             // Set the button click listener to remove the image
             deselectButton.setOnClickListener(new View.OnClickListener() {
@@ -295,8 +293,6 @@ public class EditPlaceActivity extends AppCompatActivity {
             MoreImages.setVisibility(View.VISIBLE);
         }
     }
-
-
 
     // Method to save edited data
     private void saveEditedData() {

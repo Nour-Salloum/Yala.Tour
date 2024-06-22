@@ -26,7 +26,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,18 +42,18 @@ public class LoginPage extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = fAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is signed in, navigate to homepage
             startActivity(new Intent(LoginPage.this, HomePage.class));
-            finish(); // Optional, depending on your navigation flow
+            finish();
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
+
         // Initialize UI elements
         email = findViewById(R.id.user_email);
         password = findViewById(R.id.user_password);
@@ -62,16 +61,19 @@ public class LoginPage extends AppCompatActivity {
         gotoRegister = findViewById(R.id.signupRedirectText);
         invalidCredentialsMessage = findViewById(R.id.invalidCredentialsMessage);
         ShowPass = findViewById(R.id.toggleButton);
-        fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
         forgotPassword = findViewById(R.id.forgetPasswordRedirectText);
 
+        // Initialize Firebase authentication and Firestore
+        fAuth = FirebaseAuth.getInstance();
+        fStore = FirebaseFirestore.getInstance();
+
+        // Set click listener for Login button
         Login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //checking if the password and email are not empty
+                // Check if the email and password fields are not empty
                 if (checkField(email) && checkField(password)) {
-                    // Checking the credentials are valid using firebase authentication
+                    // Attempt to sign in with Firebase Authentication
                     fAuth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
@@ -125,7 +127,7 @@ public class LoginPage extends AppCompatActivity {
                                                     }
                                                 });
                                             } else {
-                                                // Handle error
+                                                // Handle error in getting FCM token
                                                 Toast.makeText(LoginPage.this, "Failed to get FCM token", Toast.LENGTH_SHORT).show();
                                             }
                                         });
@@ -134,7 +136,7 @@ public class LoginPage extends AppCompatActivity {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            // If the email or password are wrong the user will get the following text
+                            // If email or password is incorrect, show invalid credentials message
                             invalidCredentialsMessage.setText("Email or Password is Invalid");
                         }
                     });
@@ -165,6 +167,8 @@ public class LoginPage extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Redirect to Forgot Password page
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,8 +178,7 @@ public class LoginPage extends AppCompatActivity {
         });
     }
 
-
-    //a method to check if the field is empty
+    // Method to check if a field is empty
     public boolean checkField(EditText textField) {
         if (textField.getText().toString().isEmpty()) {
             textField.setError("Could not be empty");

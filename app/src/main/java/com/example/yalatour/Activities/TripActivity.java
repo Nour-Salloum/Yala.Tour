@@ -36,7 +36,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -45,48 +44,68 @@ import java.util.UUID;
 
 public class TripActivity extends AppCompatActivity {
 
+    // UI elements
     private RecyclerView tripRecyclerView;
     private FloatingActionButton addTripButton;
+    private SearchView SearchTrip;
+
+    // Lists and adapters
     private List<TripClass> tripList;
     private List<TripClass> filteredTripList;
+    private TripAdapter adapter;
+
+    // Firebase
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
-    private TripAdapter adapter;
-    private SearchView SearchTrip;
-    private String currentCategory = "MyTrips";
 
+    // Current user info
     private String currentuserId;
     private boolean isFirstLoad = true;
+
+    // Current category of trips being displayed
+    private String currentCategory = "MyTrips";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip);
 
+        // Initialize RecyclerView
         tripRecyclerView = findViewById(R.id.TriprecyclerView);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(TripActivity.this, 1);
         tripRecyclerView.setLayoutManager(gridLayoutManager);
+
+        // Initialize lists and adapter
         tripList = new ArrayList<>();
         filteredTripList = new ArrayList<>();
         adapter = new TripAdapter(TripActivity.this, filteredTripList);
         tripRecyclerView.setAdapter(adapter);
-        addTripButton = findViewById(R.id.AddTrip);
+
+        // Initialize Firebase components
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         currentuserId = currentUser.getUid();
+
+        // Initialize UI elements
+        addTripButton = findViewById(R.id.AddTrip);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        // Handle bottom navigation item clicks
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         bottomNav.getMenu().setGroupCheckable(0, true, false);
         for (int i = 0; i < bottomNav.getMenu().size(); i++) {
             bottomNav.getMenu().getItem(i).setChecked(false);
         }
 
+        // Fetch trips based on the initial category
         if (isFirstLoad) {
-            fetchMyTrips();
+            fetchMyTrips(); // Fetch trips created by the current user (admin)
             isFirstLoad = false;
         }
+
+        // Add trip button click listener to show add trip dialog
         addTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,8 +113,7 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
-        fetchMyTrips();
-
+        // Initialize search view
         SearchTrip = findViewById(R.id.SearchTrip);
         SearchTrip.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -109,9 +127,9 @@ public class TripActivity extends AppCompatActivity {
                 return true;
             }
         });
-
     }
 
+    // Method to filter trips based on search query
     private void filterTrips(String query) {
         filteredTripList.clear();
         if (query.isEmpty()) {
@@ -126,6 +144,7 @@ public class TripActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    // Method to show add trip dialog
     private void showAddTripDialog() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialogView = inflater.inflate(R.layout.dialog_add_trip, null);
@@ -136,6 +155,7 @@ public class TripActivity extends AppCompatActivity {
 
         Button saveButton = dialogView.findViewById(R.id.save_button);
 
+        // Set click listener for date EditText to show date picker
         dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,11 +164,10 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
+        // Create and show the dialog
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(dialogView);
-
-        // Set dialog window position to the bottom
-        dialog.getWindow().setGravity(Gravity.BOTTOM);
+        dialog.getWindow().setGravity(Gravity.BOTTOM); // Set dialog window position to the bottom
 
         // Set dialog window width to match parent
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -157,22 +176,27 @@ public class TripActivity extends AppCompatActivity {
         dialog.getWindow().setAttributes(layoutParams);
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
 
+        // Handle save button click
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Retrieve input values
                 String tripName = nameEditText.getText().toString();
                 String tripDate = dateEditText.getText().toString();
                 String tripDaysString = nbDaysEditText.getText().toString();
                 String tripCode = UUID.randomUUID().toString();
                 String adminUserId = currentUser.getUid();
 
+                // Validate inputs
                 if (tripName.isEmpty() || tripDate.isEmpty() || tripDaysString.isEmpty() || tripCode.isEmpty()) {
                     Toast.makeText(TripActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
+                    // Convert days string to integer
                     int tripDays = Integer.parseInt(tripDaysString);
                     TripClass trip = new TripClass(null, tripDate, tripDays, null, null, null, null, adminUserId, tripCode, tripName);
 
+                    // Add trip to Firestore
                     db.collection("Trips").add(trip)
                             .addOnSuccessListener(documentReference -> {
                                 String tripId = documentReference.getId();
@@ -189,15 +213,14 @@ public class TripActivity extends AppCompatActivity {
                                                 fetchJoinedTrips();
                                             } else if (currentCategory.equals("RequestedTrips")) {
                                                 fetchRequestedTrips();
-                                            }
-                                            else if (currentCategory.equals("OldTrips")) {
+                                            } else if (currentCategory.equals("OldTrips")) {
                                                 fetchOldTrips();
-                                            }
-                                            else{
+                                            } else {
                                                 fetchAllTrips();
                                                 fetchTripsNotMine();
                                             }
 
+                                            // Clear input fields and dismiss dialog
                                             nameEditText.setText("");
                                             dateEditText.setText("");
                                             nbDaysEditText.setText("");
@@ -211,11 +234,10 @@ public class TripActivity extends AppCompatActivity {
             }
         });
 
-
-        dialog.show();
+        dialog.show(); // Show the dialog
     }
 
-
+    // Method to show date picker dialog
     private void showDatePicker(final EditText tripDateEditText) {
         final Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -235,6 +257,7 @@ public class TripActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    // Method to fetch trips created by the current user (admin)
     public void fetchMyTrips() {
         db.collection("Trips")
                 .whereEqualTo("tripAdminid", currentuserId)
@@ -256,6 +279,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
+    // Method to fetch trips joined by the current user
     public void fetchJoinedTrips() {
         db.collection("Trips")
                 .whereArrayContains("usersid", currentuserId)
@@ -278,6 +302,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
+    // Method to fetch all trips
     public void fetchAllTrips() {
         db.collection("Trips")
                 .orderBy("tripDate")
@@ -302,7 +327,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
-
+    // Method to fetch trips not created by the current user
     public void fetchTripsNotMine() {
         db.collection("Trips")
                 .whereNotEqualTo("tripAdminid", currentuserId)
@@ -325,6 +350,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
+    // Method to fetch old trips
     public void fetchOldTrips() {
         db.collection("Trips")
                 .addSnapshotListener((value, error) -> {
@@ -347,6 +373,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
+    // Method to check if a trip is old based on its end date
     private boolean isOldTrip(TripClass trip) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
@@ -364,8 +391,7 @@ public class TripActivity extends AppCompatActivity {
         }
     }
 
-
-
+    // Method to fetch requested trips by the current user
     public void fetchRequestedTrips() {
         tripList.clear(); // Clear the list before fetching new data
         adapter.notifyDataSetChanged();
@@ -400,6 +426,7 @@ public class TripActivity extends AppCompatActivity {
                 });
     }
 
+    // Method to handle category click events
     public void onCategoryClick(View view) {
         tripList.clear();
         adapter.notifyDataSetChanged();
@@ -420,13 +447,14 @@ public class TripActivity extends AppCompatActivity {
             fetchAllTrips();
             fetchTripsNotMine();
             addTripButton.setVisibility(View.GONE);
-        }
-        else if (view.getId() == R.id.OldTrips) {
+        } else if (view.getId() == R.id.OldTrips) {
             currentCategory = "OldTrips";
             fetchOldTrips();
             addTripButton.setVisibility(View.GONE);
         }
     }
+
+    // Bottom navigation listener to switch activities
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -455,5 +483,4 @@ public class TripActivity extends AppCompatActivity {
                     return false;
                 }
             };
-
 }

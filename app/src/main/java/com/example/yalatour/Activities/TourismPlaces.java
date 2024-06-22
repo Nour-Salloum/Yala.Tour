@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -49,19 +48,24 @@ public class TourismPlaces extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tourism_places);
 
+        // Initialize UI elements
         addPlace = findViewById(R.id.Addplace);
         recyclerView = findViewById(R.id.PlacerecyclerView);
-        PlaceSearch=findViewById(R.id.PlacesearchView);
+        PlaceSearch = findViewById(R.id.PlacesearchView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         PlaceBackButton = findViewById(R.id.PlaceBackButton);
+
+        // Retrieve cityId from intent extras
         cityId = getIntent().getStringExtra("cityId");
         Log.d("TourismPlaces", "cityId: " + cityId);
+
+        // Initialize lists and adapter
         placeList = new ArrayList<>();
         filteredplaceList = new ArrayList<>();
         adapter = new TourismPlaceAdapter(TourismPlaces.this, filteredplaceList, cityId);
         recyclerView.setAdapter(adapter);
 
-        // Fetch and display only places belonging to the selected city
+        // Fetch and display places for the selected city
         fetchPlaces();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -70,6 +74,7 @@ public class TourismPlaces extends AppCompatActivity {
         if (currentUser != null) {
             String userId = currentUser.getUid();
 
+            // Check if the user is an admin to show the addPlace button
             db.collection("Users").document(userId)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
@@ -84,6 +89,8 @@ public class TourismPlaces extends AppCompatActivity {
         } else {
             addPlace.setVisibility(View.GONE);
         }
+
+        // Set click listener for the back button
         PlaceBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,6 +98,7 @@ public class TourismPlaces extends AppCompatActivity {
             }
         });
 
+        // Set click listener for the add place button
         addPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,6 +107,8 @@ public class TourismPlaces extends AppCompatActivity {
                 startActivityForResult(intent, UPLOAD_REQUEST_CODE); // Start the activity for result
             }
         });
+
+        // Set search view listener for filtering places
         PlaceSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -111,11 +121,9 @@ public class TourismPlaces extends AppCompatActivity {
                 return true;
             }
         });
-
-
     }
 
-
+    // Method to fetch places from Firestore
     private void fetchPlaces() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Query query = db.collection("TourismPlaces").whereEqualTo("cityId", cityId);
@@ -138,34 +146,39 @@ public class TourismPlaces extends AppCompatActivity {
                         Log.e("TourismPlaces", "Error fetching places", task.getException());
                     }
                 });
+
+        // Set up bottom navigation view and its listener
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
+        // Uncheck all bottom navigation menu items
         bottomNav.getMenu().setGroupCheckable(0, true, false);
         for (int i = 0; i < bottomNav.getMenu().size(); i++) {
             bottomNav.getMenu().getItem(i).setChecked(false);
         }
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        // Handle result from UploadPlaceActivity
         if (requestCode == UPLOAD_REQUEST_CODE && resultCode == RESULT_OK) {
             if (data != null && data.getBooleanExtra("newPlaceAdded", false)) {
                 // Refresh the place list
                 fetchPlaces();
             }
-        } else if (requestCode == EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
+        }
+        // Handle result from place editing
+        else if (requestCode == EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
             Log.d("TourismPlaces", "onActivityResult() called with requestCode=" + requestCode + ", resultCode=" + resultCode);
             if (data != null && data.getBooleanExtra("placeEdited", false)) {
                 // Refresh the place list when a place is edited
                 fetchPlaces();
-
             }
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -173,6 +186,7 @@ public class TourismPlaces extends AppCompatActivity {
         fetchPlaces();
     }
 
+    // Method to filter places based on search query
     public void filterPlaces(String query) {
         filteredplaceList.clear();
         if (query.isEmpty()) {
@@ -186,12 +200,15 @@ public class TourismPlaces extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
     }
+
+    // Bottom navigation item selected listener
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Intent intent = null;
 
+                    // Handle bottom navigation item clicks
                     if (item.getItemId() == R.id.navigation_home) {
                         intent = new Intent(TourismPlaces.this, HomePage.class);
                     } else if (item.getItemId() == R.id.navigation_trips) {
@@ -199,11 +216,12 @@ public class TourismPlaces extends AppCompatActivity {
                     } else if (item.getItemId() == R.id.navigation_cities) {
                         intent = new Intent(TourismPlaces.this, CityActivity.class);
                     } else if (item.getItemId() == R.id.navigation_favorites) {
-                        intent = new Intent(TourismPlaces.this,FavoritePage.class);
+                        intent = new Intent(TourismPlaces.this, FavoritePage.class);
                     } else if (item.getItemId() == R.id.navigation_profile) {
                         intent = new Intent(TourismPlaces.this, ProfileActivity.class);
                     }
 
+                    // Start the respective activity if intent is not null
                     if (intent != null) {
                         intent.putExtra("menuItemId", item.getItemId());
                         startActivity(intent);

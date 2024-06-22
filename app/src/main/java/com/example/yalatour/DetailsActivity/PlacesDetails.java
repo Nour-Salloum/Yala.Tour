@@ -298,6 +298,8 @@ public class PlacesDetails extends AppCompatActivity {
             }
         }
     }
+
+    // Method to save review data to Firestore
     private  void SaveReviewData() {
 
         String reviewText = ReviewText.getText().toString().trim();
@@ -337,6 +339,7 @@ public class PlacesDetails extends AppCompatActivity {
                 });
     }
 
+    // Method to fetch latest reviews from Firestore
     private void fetchReviews() {
         db.collection("Reviews")
                 .whereEqualTo("review_placeid", PlaceId)
@@ -357,6 +360,7 @@ public class PlacesDetails extends AppCompatActivity {
                     }
                 });
     }
+    // Method to fetch all reviews from Firestore
     private void fetchAllReviews() {
         db.collection("Reviews")
                 .whereEqualTo("review_placeid", PlaceId)
@@ -376,6 +380,7 @@ public class PlacesDetails extends AppCompatActivity {
                     }
                 });
     }
+    // Method to fetch all reviews from Firestore
     private void AllReViewsVisibilty() {
         db.collection("Reviews")
                 .whereEqualTo("review_placeid", PlaceId)
@@ -395,6 +400,7 @@ public class PlacesDetails extends AppCompatActivity {
     }
 
 
+    // Method to save or update a rating in Firestore
     private void saveOrUpdateRatingInDatabase(float rating) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String userId = currentUser.getUid();
@@ -442,7 +448,7 @@ public class PlacesDetails extends AppCompatActivity {
     }
 
 
-
+   // Method to calculate and update the total rating
     private void CalculateRatingTotal(){
         db.collection("Ratings")
                 .whereEqualTo("rating_Placeid",PlaceId)
@@ -462,15 +468,16 @@ public class PlacesDetails extends AppCompatActivity {
                                 .update("totalRating", TotalRating).addOnSuccessListener(aVoid -> {
                                     Total.setText(TotalRating + "/5");
 
-                        }).addOnFailureListener(e -> {
-                            // Handle transaction failure
-                            Log.w("PlacesDetails", "Failed to update total rating: ", e);
-                        });
+                                }).addOnFailureListener(e -> {
+                                    // Handle transaction failure
+                                    Log.w("PlacesDetails", "Failed to update total rating: ", e);
+                                });
 
                     }
 
-    });
+                });
     }
+    // Method to get the user's rating for the current place
     private void getRatingForCurrentUser() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
