@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class MessageService extends FirebaseMessagingService {
 
-    private static final String TAG = "MessageService";
+    public static final String TAG = "MessageService";
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);

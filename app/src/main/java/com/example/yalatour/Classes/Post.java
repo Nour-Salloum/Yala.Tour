@@ -1,24 +1,31 @@
 package com.example.yalatour.Classes;
 
+import java.util.List;
+
 public class Post {
-    public String postId, userId, time, date, postimage, description, placename, username, profileImageUrl;
-    public int likes;
+    private String postId, userId, time, date, description, placename, username, profileImageUrl;
+    private List<String> postImages; // Changed to List<String>
+    private int numLikes;
 
     public Post() {
+        // Required empty constructor
     }
 
-    public Post(String postId, String userId, String time, String date, String postimage, String description, String placename, String username, String profileImageUrl) {
+    // Updated constructor to accept List<String> for postImages
+    public Post(String postId, String userId, String time, String date, List<String> postImages, String description, String placename, String username, String profileImageUrl) {
         this.postId = postId;
         this.userId = userId;
         this.time = time;
         this.date = date;
-        this.postimage = postimage;
+        this.postImages = postImages;
         this.description = description;
         this.placename = placename;
         this.username = username;
         this.profileImageUrl = profileImageUrl;
-        this.likes = 0;
+        this.numLikes = 0;
     }
+
+    // Getter and setter for postId, userId, time, date, description, placename, username, profileImageUrl
 
     public String getPostId() {
         return postId;
@@ -52,12 +59,12 @@ public class Post {
         this.date = date;
     }
 
-    public String getPostimage() {
-        return postimage;
+    public List<String> getPostImages() {
+        return postImages;
     }
 
-    public void setPostimage(String postimage) {
-        this.postimage = postimage;
+    public void setPostImages(List<String> postImages) {
+        this.postImages = postImages;
     }
 
     public String getDescription() {
@@ -91,11 +98,12 @@ public class Post {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
-    public int getLikes() {
-        return likes;
+
+    public int getNumLikes() {
+        return numLikes;
     }
 
-    public void setLikes(int likes) {
-        this.likes = likes;
+    public void setNumLikes(int numLikes) {
+        this.numLikes = numLikes;
     }
 }

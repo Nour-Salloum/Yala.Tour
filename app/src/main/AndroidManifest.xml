@@ -62,6 +62,9 @@
             android:name=".Activities.FavoritePage"
             android:exported="false" />
         <activity
+            android:name=".Activities.CommentsActivity"
+            android:exported="false" />
+        <activity
             android:name=".Adapters.TourismPlaceAdapter"
             android:exported="false" />
         <activity
