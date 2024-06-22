@@ -1,14 +1,17 @@
 package com.example.yalatour.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +21,7 @@ import com.example.yalatour.Adapters.CommentsAdapter;
 import com.example.yalatour.Adapters.ImagePagerAdapter;
 import com.example.yalatour.Classes.Comment;
 import com.example.yalatour.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
@@ -98,6 +102,13 @@ public class CommentsActivity extends AppCompatActivity {
 
         // Set click listener for Send button
         findViewById(R.id.Send).setOnClickListener(v -> sendComment());
+
+        // Set click listener for BackButton
+        findViewById(R.id.BackButton).setOnClickListener(v -> onBackPressed());
+
+        // Initialize and setup bottom navigation view
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(navListener);
     }
 
     // Method to setup image indicators
@@ -206,5 +217,41 @@ public class CommentsActivity extends AppCompatActivity {
     private String getCurrentDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return sdf.format(new Date());
+    }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Intent intent = null;
+
+                    if (item.getItemId() == R.id.navigation_home) {
+                        intent = new Intent(CommentsActivity.this, HomePage.class);
+                    } else if (item.getItemId() == R.id.navigation_trips) {
+                        intent = new Intent(CommentsActivity.this, TripActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_cities) {
+                        intent = new Intent(CommentsActivity.this, CityActivity.class);
+                    } else if (item.getItemId() == R.id.navigation_favorites) {
+                        intent = new Intent(CommentsActivity.this, FavoritePage.class);
+                    } else if (item.getItemId() == R.id.navigation_profile) {
+                        intent = new Intent(CommentsActivity.this, ProfileActivity.class);
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra("menuItemId", item.getItemId());
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // No animation
+                        return true;
+                    }
+
+                    return false;
+                }
+            };
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(CommentsActivity.this, HomePage.class);
+        startActivity(intent);
+        finish();
     }
 }

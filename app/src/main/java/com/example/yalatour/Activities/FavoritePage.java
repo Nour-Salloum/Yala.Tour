@@ -45,6 +45,9 @@ public class FavoritePage extends AppCompatActivity {
         favoriteRecyclerView.setAdapter(favoritesAdapter);
 
         favoriteRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();

@@ -13,34 +13,25 @@
         android:gravity="center"
         android:orientation="vertical"
         android:background="@drawable/rauche_rock"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:background="@color/dark_blue"
-        >
 
-        <RelativeLayout
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="50dp"
+            android:background="@color/dark_blue"
+            android:id="@+id/Title">
+
             <TextView
-                android:id="@+id/HomePage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:layout_marginLeft="20dp"
-                android:textAlignment="textStart"
                 android:text="Home"
-                android:textColor="@color/white"
                 android:textSize="23sp"
                 android:textStyle="bold"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"
                 />
-
-        </RelativeLayout>
-
-
-
-    </LinearLayout>
+        </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
