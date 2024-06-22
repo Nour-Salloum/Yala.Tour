@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +68,20 @@ public class TourismPlaces extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
+        ImageButton touristAttractionButton = findViewById(R.id.TouristAttraction);
+        ImageButton museumsButton = findViewById(R.id.Museums);
+        ImageButton religiousButton = findViewById(R.id.Religious);
+        ImageButton activitiesButton = findViewById(R.id.Activities);
+        ImageButton natureButton = findViewById(R.id.Nature);
+        Button allButton = findViewById(R.id.All);
+
+        allButton.setOnClickListener(view -> fetchPlaces());
+        touristAttractionButton.setOnClickListener(view -> fetchPlacesByCategory("Tourist Attraction"));
+        museumsButton.setOnClickListener(view -> fetchPlacesByCategory("Museums"));
+        religiousButton.setOnClickListener(view -> fetchPlacesByCategory("Religious"));
+        activitiesButton.setOnClickListener(view -> fetchPlacesByCategory("Activities"));
+        natureButton.setOnClickListener(view -> fetchPlacesByCategory("Nature"));
+        
         if (currentUser != null) {
             String userId = currentUser.getUid();
 
@@ -113,6 +128,28 @@ public class TourismPlaces extends AppCompatActivity {
         });
 
 
+    }
+
+    private void fetchPlacesByCategory(String category) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("TourismPlaces")
+                .whereArrayContains("placeCategories", category)
+                .whereEqualTo("cityId", cityId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        placeList.clear();
+                        filteredplaceList.clear(); // Clear the filtered list before adding new items
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            TourismPlaceClass place = document.toObject(TourismPlaceClass.class);
+                            placeList.add(place);
+                            filteredplaceList.add(place);
+                        }
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(TourismPlaces.this, "Error getting places: " + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
