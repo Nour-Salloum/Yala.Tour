@@ -258,6 +258,7 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
                 editIntent.putExtra("PostId", post.getPostId());
                 editIntent.putExtra("Description", post.getDescription());
                 editIntent.putExtra("PlaceName", post.getPlacename());
+                editIntent.putStringArrayListExtra("PostImages", (ArrayList<String>) post.getPostImages()); // Pass postImages list
                 context.startActivity(editIntent);
             });
         }
