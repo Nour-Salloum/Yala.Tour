@@ -40,18 +40,13 @@ public class ForgetPasswordPage extends AppCompatActivity {
         Email = findViewById(R.id.forget_user_email);
         ResetPasswordButton = findViewById(R.id.ResetPassword);
         CheckEmail = findViewById(R.id.CheckEmail);
-
-        // Initialize Firebase authentication and Firestore
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Set click listener for Reset Password button
         ResetPasswordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String userEmail = Email.getText().toString().trim();
-
-                // Validate email input
                 if (TextUtils.isEmpty(userEmail) || !Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
                     CheckEmail.setText("Please Enter a Valid Email");
                     return;
@@ -62,7 +57,6 @@ public class ForgetPasswordPage extends AppCompatActivity {
         });
     }
 
-    // Method to check if email exists in Firestore
     private void checkEmailExists(final String email) {
         db.collection("Users")
                 .whereEqualTo("email", email)
@@ -81,7 +75,6 @@ public class ForgetPasswordPage extends AppCompatActivity {
                 });
     }
 
-    // Method to send password reset email
     private void sendPasswordResetEmail(String email) {
         auth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -95,7 +88,6 @@ public class ForgetPasswordPage extends AppCompatActivity {
         });
     }
 
-    // Method to show dialog if email not found
     private void showEmailNotFoundDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("We did not find your account for this email.")
@@ -107,13 +99,12 @@ public class ForgetPasswordPage extends AppCompatActivity {
                 })
                 .setNegativeButton("Create New Account", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // Redirect to Signup page
                         Intent intent = new Intent(ForgetPasswordPage.this, SignupPage.class);
                         startActivity(intent);
                         finish();
                     }
                 });
-        // Create and show the AlertDialog
+        // Create the AlertDialog object and return it
         builder.create().show();
     }
 }
