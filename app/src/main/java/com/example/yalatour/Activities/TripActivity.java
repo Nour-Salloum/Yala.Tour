@@ -336,8 +336,11 @@ public class TripActivity extends AppCompatActivity {
                         tripList.clear();
                         for (DocumentSnapshot document : value.getDocuments()) {
                             TripClass tripClass = document.toObject(TripClass.class);
-                            if (tripClass != null && isOldTrip(tripClass) && (tripClass.getTripAdminid().equals(currentuserId) || tripClass.getUsersid().contains(currentuserId))) {
-                                tripList.add(tripClass);
+                            if (tripClass != null && isOldTrip(tripClass)) {
+                                List<String> usersid = tripClass.getUsersid();
+                                if (tripClass.getTripAdminid().equals(currentuserId) || (usersid != null && usersid.contains(currentuserId))) {
+                                    tripList.add(tripClass);
+                                }
                             }
                         }
                         filterTrips(SearchTrip.getQuery().toString());
