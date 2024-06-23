@@ -87,27 +87,21 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
     }
 
     private void loadPosts() {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Posts")
-                .orderBy("date", Query.Direction.ASCENDING)
+                .orderBy("date", Query.Direction.ASCENDING) // Adjust field name as per your Firestore structure
                 .orderBy("time", Query.Direction.ASCENDING)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        // Handle error
-                        return;
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    postList.clear(); // Clear existing posts
+                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        Post post = documentSnapshot.toObject(Post.class);
+                        postList.add(post);
                     }
-
-                    if (value != null) {
-                        postList.clear();
-                        for (QueryDocumentSnapshot doc : value) {
-                            Post post = doc.toObject(Post.class);
-                            post.setPostId(doc.getId());
-                            postList.add(post);
-                        }
-                        notifyDataSetChanged();
-                    }
+                    notifyDataSetChanged(); // Notify adapter that data set has changed
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading posts", e);
+                    showToast("Failed to load posts: " + e.getMessage());
                 });
     }
 
