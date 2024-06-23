@@ -49,7 +49,7 @@ public class EditCityActivity extends AppCompatActivity {
         CityDesc = getIntent().getStringExtra("Description");
         CityArea = getIntent().getStringExtra("Area");
         imageURL = getIntent().getStringExtra("Image");
-        CityId = getIntent().getStringExtra("Id");
+        CityId = getIntent().getStringExtra("cityId");
 
         // Load image using Glide
         Glide.with(this).load(imageURL).into(EditImage);
