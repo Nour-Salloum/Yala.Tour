@@ -91,8 +91,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Posts")
-                .whereNotEqualTo("userId", currentUserId)
-                .orderBy("userId")
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
