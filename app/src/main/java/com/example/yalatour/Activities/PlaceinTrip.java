@@ -41,50 +41,76 @@ import java.util.UUID;
 
 public class PlaceinTrip extends AppCompatActivity {
 
-    private Button AddPlacetoTrip,CreateTripDialog;
+    // UI components
+    private Button AddPlacetoTrip, CreateTripDialog;
     private RecyclerView TripPlace;
     private PlaceinTripAdapter adapter;
+
+    // Firebase instances
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
+    // Data lists
     private List<TripClass> Trips;
     private List<TourismPlaceClass> NewTripPlaces;
     private String PlaceId;
     private FirebaseUser currentUser;
-    private  String currentuserId;
+    private String currentuserId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_placein_trip);
 
-        PlaceId=getIntent().getExtras().getString("PlaceId");
+        // Initialize Firebase instances
         db = FirebaseFirestore.getInstance();
-        mAuth=FirebaseAuth.getInstance();
-        TripPlace=findViewById(R.id.Tripplace);
-        Trips=new ArrayList<>();
-        adapter=new PlaceinTripAdapter(this,Trips);
+        mAuth = FirebaseAuth.getInstance();
+
+        // Get the place ID from the intent
+        PlaceId = getIntent().getExtras().getString("PlaceId");
+
+        // Initialize UI components
+        TripPlace = findViewById(R.id.Tripplace);
+        AddPlacetoTrip = findViewById(R.id.AddPlacetoTrip);
+        CreateTripDialog = findViewById(R.id.CreateTripDialog);
+
+        // Initialize data lists
+        Trips = new ArrayList<>();
+        NewTripPlaces = new ArrayList<>();
+
+        // Set up RecyclerView
+        adapter = new PlaceinTripAdapter(this, Trips);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(PlaceinTrip.this, 1);
         TripPlace.setLayoutManager(gridLayoutManager);
         TripPlace.setAdapter(adapter);
+
+        // Get current user
         currentUser = mAuth.getCurrentUser();
         currentuserId = currentUser.getUid();
-        AddPlacetoTrip=findViewById(R.id.AddPlacetoTrip);
-        CreateTripDialog=findViewById(R.id.CreateTripDialog);
-        NewTripPlaces=new ArrayList<>();
+
+        // Set onClick listener for adding place to trip
         AddPlacetoTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                     addPlaceToSelectedTrips();
-
+                // Call function to add the selected place to selected trips
+                addPlaceToSelectedTrips();
             }
         });
+
+        // Set onClick listener for creating a new trip
         CreateTripDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                   showAddTripDialog();
+                // Call function to show the dialog for adding a new trip
+                showAddTripDialog();
             }
         });
+
+        // Fetch trips for the current user
         fetchMyTrips();
     }
+
+    // Function to add a place to selected trips
     private void addPlaceToSelectedTrips() {
         // Query Firestore to get the tourism place document
         db.collection("TourismPlaces").document(PlaceId)
@@ -130,6 +156,8 @@ public class PlaceinTrip extends AppCompatActivity {
                     // Handle any errors that occurred during the retrieval
                 });
     }
+
+    // Function to show the dialog for adding a new trip
     private void showAddTripDialog() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View dialogView = inflater.inflate(R.layout.dialog_add_trip, null);
@@ -235,6 +263,7 @@ public class PlaceinTrip extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    // Function to fetch the user's trips from Firestore
     public void fetchMyTrips() {
         db.collection("Trips")
                 .whereEqualTo("tripAdminid", currentuserId)
@@ -261,5 +290,4 @@ public class PlaceinTrip extends AppCompatActivity {
                     }
                 });
     }
-
 }

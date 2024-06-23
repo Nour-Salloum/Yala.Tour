@@ -43,14 +43,14 @@ public class SelectingPlacesAdapter extends RecyclerView.Adapter<SelectingPlaces
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TourismPlaceClass place = placesList.get(position);
         holder.placeTitle.setText(place.getPlaceName());
-        holder.placeCheckbox.setOnCheckedChangeListener(null); // Remove previous listener to avoid callback during initialization
-        holder.placeCheckbox.setChecked(selectedPlacesList.contains(place));
+        holder.placeCheckbox.setOnCheckedChangeListener(null);
+        holder.placeCheckbox.setChecked(selectedPlacesList.contains(place)); // Ensure checkbox state reflects selection
         Glide.with(context).load(place.getPlaceImages().get(0)).into(holder.placeImage);
 
         holder.placeCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
+            if (isChecked && !selectedPlacesList.contains(place)) {
                 selectedPlacesList.add(place);
-            } else {
+            } else if (!isChecked && selectedPlacesList.contains(place)) {
                 selectedPlacesList.remove(place);
             }
         });

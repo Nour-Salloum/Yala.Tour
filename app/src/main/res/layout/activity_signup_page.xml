@@ -68,7 +68,8 @@
                 android:layout_toRightOf="@+id/user_password"
                 android:text=""
                 android:textOff=""
-                android:textOn="" />
+                android:textOn=""
+                android:background="@drawable/hide"/>
         </RelativeLayout>
         <TextView
             android:layout_width="wrap_content"

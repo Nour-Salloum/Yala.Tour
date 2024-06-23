@@ -42,6 +42,7 @@ public class LoginPage extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = fAuth.getCurrentUser();
         if (currentUser != null) {
@@ -149,8 +150,10 @@ public class LoginPage extends AppCompatActivity {
 
                 if (isChecked) {
                     password.setTransformationMethod(null); // Show password
+                    ShowPass.setBackgroundResource(R.drawable.show);
                 } else {
                     password.setTransformationMethod(new PasswordTransformationMethod()); // Hide password
+                    ShowPass.setBackgroundResource(R.drawable.hide);
                 }
                 password.setSelection(savedCursorPosition);
             }

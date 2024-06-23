@@ -137,9 +137,11 @@ public class SignupPage extends AppCompatActivity {
                 savedCursorPosition = password.getSelectionStart();
 
                 if (isChecked) {
-                    password.setTransformationMethod(null);
+                    password.setTransformationMethod(null); // Show password
+                    ShowPass.setBackgroundResource(R.drawable.show);
                 } else {
-                    password.setTransformationMethod(new PasswordTransformationMethod());
+                    password.setTransformationMethod(new PasswordTransformationMethod()); // Hide password
+                    ShowPass.setBackgroundResource(R.drawable.hide);
                 }
                 password.setSelection(savedCursorPosition);
             }

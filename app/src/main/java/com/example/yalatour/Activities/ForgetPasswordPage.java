@@ -39,7 +39,7 @@ public class ForgetPasswordPage extends AppCompatActivity {
         // Initialize UI elements
         Email = findViewById(R.id.forget_user_email);
         ResetPasswordButton = findViewById(R.id.ResetPassword);
-        CheckEmail = findViewById(R.id.CheckEmail); // Make sure this ID is correct in your XML layout
+        CheckEmail = findViewById(R.id.CheckEmail);
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
