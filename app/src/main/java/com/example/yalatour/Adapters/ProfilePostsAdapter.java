@@ -287,21 +287,45 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
                         .setMessage("Are you sure you want to delete this post?")
                         .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
-                            db.collection("Posts").document(post.getPostId())
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        postList.remove(post);
-                                        adapter.notifyDataSetChanged();
-                                        Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(context, "Error deleting post", Toast.LENGTH_SHORT).show();
+
+                            // First, query the comments outside of the batch
+                            db.collection("Comments")
+                                    .whereEqualTo("postId", post.getPostId())
+                                    .get()
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            List<String> commentIds = new ArrayList<>();
+                                            for (QueryDocumentSnapshot commentDoc : task.getResult()) {
+                                                commentIds.add(commentDoc.getId());
+                                            }
+
+                                            // Now delete the post and comments in a batch
+                                            db.runBatch(batch -> {
+                                                // Delete the post
+                                                batch.delete(db.collection("Posts").document(post.getPostId()));
+
+                                                // Delete each comment
+                                                for (String commentId : commentIds) {
+                                                    batch.delete(db.collection("Comments").document(commentId));
+                                                }
+                                            }).addOnSuccessListener(aVoid -> {
+                                                postList.remove(post);
+                                                adapter.notifyDataSetChanged();
+                                                Toast.makeText(context, "Post and related comments deleted", Toast.LENGTH_SHORT).show();
+                                            }).addOnFailureListener(e -> {
+                                                Toast.makeText(context, "Error deleting post and comments", Toast.LENGTH_SHORT).show();
+                                            });
+                                        } else {
+                                            Toast.makeText(context, "Failed to query comments", Toast.LENGTH_SHORT).show();
+                                        }
                                     });
                         })
                         .setNegativeButton(android.R.string.no, null)
                         .show();
             });
         }
+
+
 
         public void bindEditButton(Post post, Context context) {
             ImageView editPost = mView.findViewById(R.id.EditPost);

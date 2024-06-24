@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -88,6 +89,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         loadUserProfile();
+        ImageButton editProfileButton = findViewById(R.id.EditProfile);
+        editProfileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+            startActivityForResult(intent, EDIT_PROFILE_REQUEST_CODE);
+        });
     }
 
     private void showLogoutConfirmationDialog() {
@@ -167,5 +173,18 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(ProfileActivity.this, "Failed to load user profile", Toast.LENGTH_SHORT).show());
+    }
+
+    private static final int EDIT_PROFILE_REQUEST_CODE = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EDIT_PROFILE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            String newProfileImageUrl = data.getStringExtra("profileImageUrl");
+            if (newProfileImageUrl != null && !newProfileImageUrl.isEmpty()) {
+                Glide.with(this).load(newProfileImageUrl).into(profileImage);
+            }
+        }
     }
 }

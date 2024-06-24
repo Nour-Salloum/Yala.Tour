@@ -43,6 +43,9 @@
             android:name=".Activities.PlaceinTrip"
             android:exported="false" />
         <activity
+            android:name=".Activities.EditProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetailsActivity.TripDetails"
             android:exported="false" />
         <activity

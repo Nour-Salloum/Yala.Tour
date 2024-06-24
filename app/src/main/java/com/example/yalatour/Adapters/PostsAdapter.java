@@ -34,6 +34,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -88,13 +89,15 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
     private void loadPosts() {
         db.collection("Posts")
-                .orderBy("date", Query.Direction.ASCENDING) // Adjust field name as per your Firestore structure
+                .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     postList.clear(); // Clear existing posts
+
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                         Post post = documentSnapshot.toObject(Post.class);
+                        post.setPostId(documentSnapshot.getId()); // Set postId from document ID
                         postList.add(post);
                     }
                     notifyDataSetChanged(); // Notify adapter that data set has changed
@@ -104,6 +107,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                     showToast("Failed to load posts: " + e.getMessage());
                 });
     }
+
 
     @NonNull
     @Override
@@ -301,15 +305,36 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                         .setMessage("Are you sure you want to delete this post?")
                         .setPositiveButton(android.R.string.yes, (dialog, which) -> {
                             FirebaseFirestore db = FirebaseFirestore.getInstance();
-                            db.collection("Posts").document(post.getPostId())
-                                    .delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        postList.remove(post);
-                                        adapter.notifyDataSetChanged();
-                                        Toast.makeText(context, "Post deleted", Toast.LENGTH_SHORT).show();
+                            String postId = post.getPostId();
+
+                            // Query to get all comments associated with the post
+                            db.collection("Comments")
+                                    .whereEqualTo("postId", postId)
+                                    .get()
+                                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                                        WriteBatch batch = db.batch();
+
+                                        // Add each comment deletion to the batch
+                                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                            batch.delete(doc.getReference());
+                                        }
+
+                                        // Add post deletion to the batch
+                                        batch.delete(db.collection("Posts").document(postId));
+
+                                        // Commit the batch
+                                        batch.commit()
+                                                .addOnSuccessListener(aVoid -> {
+                                                    postList.remove(post);
+                                                    adapter.notifyDataSetChanged();
+                                                    Toast.makeText(context, "Post and its comments deleted", Toast.LENGTH_SHORT).show();
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Toast.makeText(context, "Error deleting post and comments", Toast.LENGTH_SHORT).show();
+                                                });
                                     })
                                     .addOnFailureListener(e -> {
-                                        Toast.makeText(context, "Error deleting post", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, "Error fetching comments for deletion", Toast.LENGTH_SHORT).show();
                                     });
                         })
                         .setNegativeButton(android.R.string.no, null)
