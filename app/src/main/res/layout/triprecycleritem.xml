@@ -1,15 +1,15 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
         android:layout_width="270dp"
         android:layout_height="300dp"
         android:id="@+id/TripCard"
-        android:layout_marginLeft="70dp"
-        android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="8dp">
 
@@ -65,9 +65,9 @@
         android:id="@+id/DateText"
         android:text="Start Date:"
         android:textSize="20sp"
-        android:layout_below="@+id/TripCard"
+        android:layout_below="@id/TripCard"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="70dp" />
+        android:layout_marginStart="70dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -75,10 +75,10 @@
         android:id="@+id/TripDate"
         android:text="Date"
         android:textSize="20sp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@+id/TripCard"
-        android:layout_toRightOf="@+id/DateText" />
+        android:layout_below="@id/TripCard"
+        android:layout_toEndOf="@id/DateText" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -86,9 +86,9 @@
         android:id="@+id/EndDateText"
         android:text="End Date:"
         android:textSize="20sp"
-        android:layout_marginLeft="70dp"
+        android:layout_marginStart="70dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@+id/DateText" />
+        android:layout_below="@id/DateText" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -96,10 +96,10 @@
         android:id="@+id/TripEndDate"
         android:text="Date"
         android:textSize="20sp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@+id/TripDate"
-        android:layout_toRightOf="@+id/EndDateText" />
+        android:layout_below="@id/TripDate"
+        android:layout_toEndOf="@id/EndDateText" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -107,9 +107,9 @@
         android:id="@+id/TripAdminText"
         android:text="Admin:"
         android:textSize="20sp"
-        android:layout_marginLeft="70dp"
+        android:layout_marginStart="70dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@+id/EndDateText" />
+        android:layout_below="@id/EndDateText" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -117,9 +117,9 @@
         android:id="@+id/TripAdmin"
         android:text="Name"
         android:textSize="20sp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:layout_below="@+id/TripEndDate"
-        android:layout_toRightOf="@+id/TripAdminText" />
+        android:layout_below="@id/TripEndDate"
+        android:layout_toEndOf="@id/TripAdminText" />
 
 </RelativeLayout>

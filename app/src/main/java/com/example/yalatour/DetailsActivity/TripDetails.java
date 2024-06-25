@@ -378,34 +378,28 @@ public class TripDetails extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        fetchRequirements();
-
-    }
 
     private void fetchRequirements() {
         db.collection("Trips").document(TripId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
+                .addSnapshotListener((documentSnapshot, e) -> {
+                    if (e != null) {
+                        // Handle failure
+                        return;
+                    }
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
                         List<TripRequirementsClass> updatedRequirements = documentSnapshot.toObject(TripClass.class).getRequirements();
                         requirementsList.clear();
                         if (updatedRequirements != null) {
                             requirementsList.addAll(updatedRequirements);
-                        }
-                        else {
+                        } else {
                             requirementsList.add(new TripRequirementsClass("", false));
                         }
-                        requirementsAdapter.notifyDataSetChanged();
+                        requirementsAdapter.notifyDataSetChanged(); // Notify adapter of data changes
                     }
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failure
                 });
     }
+
+
     private void fetchMemories() {
         db.collection("Memories")
                 .whereEqualTo("memory_TripId", TripId)
