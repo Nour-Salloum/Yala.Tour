@@ -8,6 +8,7 @@
     android:background="@drawable/rauche_rock"
     tools:context=".DetailsActivity.TripDetails">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
@@ -256,6 +257,7 @@
         android:src="@drawable/baseline_add_24"
         android:visibility="gone"
         android:tint="@color/white"/>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/EditMemory"

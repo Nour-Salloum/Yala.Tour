@@ -234,9 +234,15 @@ public class TripDetails extends AppCompatActivity {
             }
         });
 
+        Log.d(TAG, "Setting AddMemory visibility to GONE");
+        AddMemory.setVisibility(View.GONE);
+        Log.d(TAG, "AddMemory visibility: " + AddMemory.getVisibility());
+
+        EditMemory.setVisibility(View.GONE);
         checkAdminAndInitialize();
         checkIfTripIsOld();
         fetchSelectedPlaces();
+
 
     }
     private String getMemoryId() {
@@ -267,32 +273,6 @@ public class TripDetails extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     // Handle failure
-                });
-    }
-    private void checkIfTripIsOld() {
-        db.collection("Trips").document(TripId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        TripClass trip = documentSnapshot.toObject(TripClass.class);
-                        if (trip != null && isOldTrip(trip)) {
-                            isOldTrip = true;
-
-
-                        } else {
-                            isOldTrip = false;
-
-                        }
-                        // After determining isOldTrip, update UI
-                        Log.d(TAG, "isOldTrip: " + isOldTrip);
-                        initializeRequirementsRecyclerView();
-                        updateUIOldTrip();
-
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failure
-                    Log.e(TAG, "Error checking if trip is old: " + e.getMessage());
                 });
     }
 
@@ -403,7 +383,6 @@ public class TripDetails extends AppCompatActivity {
         super.onResume();
 
         fetchRequirements();
-        fetchMemories();
 
     }
 
@@ -544,6 +523,32 @@ public class TripDetails extends AppCompatActivity {
             return false;
         }
     }
+    private void checkIfTripIsOld() {
+        db.collection("Trips").document(TripId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        TripClass trip = documentSnapshot.toObject(TripClass.class);
+                        if (trip != null && isOldTrip(trip)) {
+                            isOldTrip = true;
+
+
+                        } else {
+                            isOldTrip = false;
+
+                        }
+                        updateUI();
+                        // After determining isOldTrip, update UI
+                        Log.d(TAG, "isOldTrip: " + isOldTrip);
+
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure
+                    Log.e(TAG, "Error checking if trip is old: " + e.getMessage());
+                });
+    }
+
 
 
 
@@ -566,31 +571,26 @@ public class TripDetails extends AppCompatActivity {
             findViewById(R.id.Members).setVisibility(View.GONE);
             findViewById(R.id.Requests).setVisibility(View.GONE);
         }
-
-
-
-    }
-    private void updateUIOldTrip() {
-        Log.d(TAG, "updateUI: isOldTrip = " + isOldTrip);
-        Log.d(TAG, "isOldTrip: " + isOldTrip + ", isUserAdmin: " + isUserAdmin);
-        if (isOldTrip) {
-            AddMemory.setVisibility(View.VISIBLE);
-            EditMemory.setVisibility(View.VISIBLE);
+        if(isOldTrip){
             findViewById(R.id.Memories).setVisibility(View.VISIBLE);
-        } else {
-            AddMemory.setVisibility(View.GONE);
-            EditMemory.setVisibility(View.GONE);
+        }
+        else{
             findViewById(R.id.Memories).setVisibility(View.GONE);
         }
-
-        if (!isOldTrip && isUserAdmin) {
-            AddPlace.setVisibility(View.VISIBLE);
-            findViewById(R.id.Requests).setVisibility(View.VISIBLE);
-        } else {
+        if(isOldTrip && isUserAdmin){
             AddPlace.setVisibility(View.GONE);
             findViewById(R.id.Requests).setVisibility(View.GONE);
         }
+        else if (!isOldTrip && isUserAdmin) {
+            AddPlace.setVisibility(View.VISIBLE);
+            findViewById(R.id.Requests).setVisibility(View.VISIBLE);
+        }
+
+
+
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -660,7 +660,7 @@ public class TripDetails extends AppCompatActivity {
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.GONE);
+           // AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
@@ -683,7 +683,7 @@ public class TripDetails extends AppCompatActivity {
             SaveMyRequirements.setVisibility(View.GONE);
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.GONE);
+            //AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
@@ -703,7 +703,7 @@ public class TripDetails extends AppCompatActivity {
             Save.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.VISIBLE);
             RequetsRecyclerView.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.GONE);
+           // AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
@@ -719,7 +719,7 @@ public class TripDetails extends AppCompatActivity {
             MyRequirementsRecyclerView.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.VISIBLE);
             MembersRecyclerView.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.GONE);
+           // AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
@@ -737,7 +737,7 @@ public class TripDetails extends AppCompatActivity {
             Save.setVisibility(View.GONE);
             RequetsRecyclerView.setVisibility(View.GONE);
             MembersRecyclerView.setVisibility(View.GONE);
-            AddMemory.setVisibility(View.GONE);
+            //AddMemory.setVisibility(View.GONE);
             EditMemory.setVisibility(View.GONE);
             memoriesTextRecyclerView.setVisibility(View.GONE);
             memoriesImageRecyclerView.setVisibility(View.GONE);
@@ -754,7 +754,7 @@ public class TripDetails extends AppCompatActivity {
             memoriesImageRecyclerView.setVisibility(View.VISIBLE);
             memoriesVideoRecyclerView.setVisibility(View.VISIBLE);
             if(getMemoryId()!=null){
-                EditMemory.setVisibility(View.VISIBLE);
+               EditMemory.setVisibility(View.VISIBLE);
                 AddMemory.setVisibility(View.GONE);
             }
             else{
