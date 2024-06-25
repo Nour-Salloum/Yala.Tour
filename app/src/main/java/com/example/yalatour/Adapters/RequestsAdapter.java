@@ -108,6 +108,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
                         if (documentSnapshot.exists()) {
                             String tripName = documentSnapshot.getString("tripName");
                             List<String> userIds = new ArrayList<>();
+                            userIds.addAll((List<String>) documentSnapshot.get("usersid"));
                             userIds.add(userId);
                             db.collection("Trips").document(tripId)
                                     .update("usersid", userIds)
