@@ -33,7 +33,7 @@ public class FCMNotificationSender {
 
     public void sendNotification() {
         Log.d(TAG, "sendNotification method called");
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        RequestQueue requestQueue = Volley.newRequestQueue(context);//which manages HTTP requests for networking operations.
 
         try {
             // Construct the JSON payload

@@ -305,6 +305,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.ViewHolder>{
                                     String requestId = UUID.randomUUID().toString();
                                     TripRequestsClass request = new TripRequestsClass(requestId, currentUserId, currentUserName);
                                     List<TripRequestsClass> Requests = new ArrayList<>();
+                                    Requests= trip.getRequests();
                                     Requests.add(request);
 
                                     db.collection("Trips").document(trip.getTripId())
