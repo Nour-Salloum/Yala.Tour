@@ -156,6 +156,14 @@ public class TripClass {
             return null;
         }
     }
+    public void setEndDate(String endDate) {
+        // Dummy setter
+    }
+
+    public void setEndDate2(Date endDate) {
+        // Dummy setter
+    }
+
 
 
 }

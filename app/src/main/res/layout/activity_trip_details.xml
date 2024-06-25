@@ -210,6 +210,7 @@
                 android:layout_height="wrap_content"
                 android:text="Save"
                 android:id="@+id/Save"
+                android:visibility="gone"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginBottom="10dp"
