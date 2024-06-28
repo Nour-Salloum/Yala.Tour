@@ -142,6 +142,7 @@ public class UploadMemoryActivity extends AppCompatActivity {
         startActivityForResult(mediaPicker, 1);
     }
 
+
     private void addNewMemoryText() {
         String memoryTextContent = MemoryText.getText().toString().trim();
         if (!memoryTextContent.isEmpty()) {

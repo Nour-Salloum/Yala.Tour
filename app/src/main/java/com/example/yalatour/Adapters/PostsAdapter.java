@@ -5,6 +5,7 @@ import static com.example.yalatour.Classes.MessageService.TAG;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -397,6 +398,19 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
 
         public void bindLikeButton(Post post, Context context, PostsAdapter adapter) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("PostPreferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            boolean isLiked = sharedPreferences.getBoolean("liked_" + post.getPostId(), false);
+
+            if (isLiked) {
+                likeButton.setVisibility(View.GONE);
+                dislikeButton.setVisibility(View.VISIBLE);
+            } else {
+                likeButton.setVisibility(View.VISIBLE);
+                dislikeButton.setVisibility(View.GONE);
+            }
+
             likeButton.setOnClickListener(v -> {
                 likeButton.setVisibility(View.GONE);
                 dislikeButton.setVisibility(View.VISIBLE);
@@ -408,6 +422,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                 // Update local post object
                 post.setNumLikes(updatedLikes);
                 setLikes(updatedLikes); // Update likes count in UI
+
+                // Save like status
+                editor.putBoolean("liked_" + post.getPostId(), true);
+                editor.apply();
             });
 
             dislikeButton.setOnClickListener(v -> {
@@ -421,6 +439,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                 // Update local post object
                 post.setNumLikes(updatedLikes);
                 setLikes(updatedLikes); // Update likes count in UI
+
+                // Save like status
+                editor.putBoolean("liked_" + post.getPostId(), false);
+                editor.apply();
             });
         }
 

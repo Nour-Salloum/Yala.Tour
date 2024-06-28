@@ -4,6 +4,7 @@ import static com.example.yalatour.Classes.MessageService.TAG;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -392,6 +393,21 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
         }
 
         public void bindLikeButton(Post post, Context context, ProfilePostsAdapter adapter) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("PostPreferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            // Retrieve the like status from SharedPreferences
+            boolean isLiked = sharedPreferences.getBoolean("liked_" + post.getPostId(), false);
+
+            // Set the initial visibility of the buttons based on the like status
+            if (isLiked) {
+                likeButton.setVisibility(View.GONE);
+                dislikeButton.setVisibility(View.VISIBLE);
+            } else {
+                likeButton.setVisibility(View.VISIBLE);
+                dislikeButton.setVisibility(View.GONE);
+            }
+
             likeButton.setOnClickListener(v -> {
                 likeButton.setVisibility(View.GONE);
                 dislikeButton.setVisibility(View.VISIBLE);
@@ -403,6 +419,10 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
                 // Update local post object
                 post.setNumLikes(updatedLikes);
                 setLikes(updatedLikes); // Update likes count in UI
+
+                // Save like status
+                editor.putBoolean("liked_" + post.getPostId(), true);
+                editor.apply();
             });
 
             dislikeButton.setOnClickListener(v -> {
@@ -416,8 +436,13 @@ public class ProfilePostsAdapter extends RecyclerView.Adapter<ProfilePostsAdapte
                 // Update local post object
                 post.setNumLikes(updatedLikes);
                 setLikes(updatedLikes); // Update likes count in UI
+
+                // Save like status
+                editor.putBoolean("liked_" + post.getPostId(), false);
+                editor.apply();
             });
         }
+
 
         public void setLikes(int likesCount) {
             likes.setText(likesCount + (likesCount == 1 ? " like" : " likes"));
